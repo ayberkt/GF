@@ -68,6 +68,9 @@ resource ResTur = ParamX ** open Prelude, Predef, HarmonyTur in {
     mkPrep : Str -> Case -> {s : Str; c : Case; lock_Prep : {}} =
       \s, c -> lin Prep {s=s; c=c};
 
+    mkNP : Noun -> Number -> Person -> {s : Case => Str; a : Agr} =
+      \noun, n, p -> {s = noun.s ! n; a = {n = n; p = p}} ;
+
     mkClause : Str -> Agr -> Verb -> {s : Str} =
       \np, a, v -> ss (np ++ v.s ! VProg a) ;
 }

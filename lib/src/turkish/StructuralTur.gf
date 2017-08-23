@@ -87,13 +87,7 @@ concrete StructuralTur of Structural = CatTur **
 
     but_PConj = ss "ama" ;
 
-    everybody_NP  =
-      let
-        herkes : N = mkN "herkes"
-      in
-        {
-          s = herkes.s ! Sg;
-          a = {n = Sg; p = P1}
-        };
+    everybody_NP  = mkNP (mkN "herkes") Sg P1 ;
+    everything_NP = mkNP (mkN "herşey") Sg P1 ;
 
 }
