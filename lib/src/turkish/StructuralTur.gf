@@ -90,4 +90,6 @@ concrete StructuralTur of Structural = CatTur **
     everybody_NP  = mkNP (mkN "herkes") Sg P1 ;
     everything_NP = mkNP (mkN "herşey") Sg P1 ;
 
+    many_Det = mkDet "birçok" Sg NoGen ;
+
 }
