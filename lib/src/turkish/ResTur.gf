@@ -73,4 +73,7 @@ resource ResTur = ParamX ** open Prelude, Predef, HarmonyTur in {
 
     mkClause : Str -> Agr -> Verb -> {s : Str} =
       \np, a, v -> ss (np ++ v.s ! VProg a) ;
+
+    mkDet : Str -> Number -> UseGen -> {s : Str; n : Number; useGen : UseGen} =
+      \s, n, ug -> {s = s; n = n; useGen = ug} ;
 }
