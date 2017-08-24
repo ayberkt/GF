@@ -8,4 +8,8 @@ concrete VerbTur of Verb = CatTur ** open ResTur in {
       s = \\ vf => vps.c.s ++ np.s ! vps.c.c ++ vps.s ! vf ;
     } ;
 
+    AdVVP adv vp = {
+      s = \\f => adv.s ++ vp.s ! f
+    } ;
+
 }
