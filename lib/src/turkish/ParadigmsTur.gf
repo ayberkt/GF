@@ -257,10 +257,9 @@ resource ParadigmsTur = open
               VInfinitive    => inf ;
               Gerund _  Acc  =>
                 case aorHar.vow of {
-                  Ih_Har  => mek + "si" ;
-                  I_Har   => mek + "sı" ;
-                  U_Har   => "TODO" ;
-                  Uh_Har  => "TODO"
+                  Ih_Har             => mek + "si" ;
+                  I_Har              => mek + "sı" ;
+                  _                  => mek
                 } ;
               Gerund _  _    => mek
             }
