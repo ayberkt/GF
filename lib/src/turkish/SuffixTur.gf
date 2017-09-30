@@ -115,22 +115,22 @@ resource SuffixTur = open Prelude, Predef, ResTur, HarmonyTur in {
 
     genSuffixes : Agr => Suffix =
       table {
-	{n=Sg; p=P1} => genSgP1Suffix ;
-	{n=Sg; p=P2} => genSgP2Suffix ;
-	{n=Sg; p=P3} => genSgP3Suffix ;
-	{n=Pl; p=P1} => genPlP1Suffix ;
-	{n=Pl; p=P2} => genPlP2Suffix ;
-	{n=Pl; p=P3} => genPlP3Suffix
+        {n=Sg; p=P1} => genSgP1Suffix ;
+        {n=Sg; p=P2} => genSgP2Suffix ;
+        {n=Sg; p=P3} => genSgP3Suffix ;
+        {n=Pl; p=P1} => genPlP1Suffix ;
+        {n=Pl; p=P2} => genPlP2Suffix ;
+        {n=Pl; p=P3} => genPlP3Suffix
       } ;
 
     verbSuffixes : Agr => Suffix =
       table {
-	{n=Sg; p=P1} => p1SgVerbalSuffix ;
-	{n=Sg; p=P2} => p2SgVerbalSuffix ;
-	{n=Sg; p=P3} => empSuffix ;
-	{n=Pl; p=P1} => p1PlVerbalSuffix ;
-	{n=Pl; p=P2} => p2PlVerbalSuffix ;
-	{n=Pl; p=P3} => p3PlVerbalSuffix
+        {n=Sg; p=P1} => p1SgVerbalSuffix ;
+        {n=Sg; p=P2} => p2SgVerbalSuffix ;
+        {n=Sg; p=P3} => empSuffix ;
+        {n=Pl; p=P1} => p1PlVerbalSuffix ;
+        {n=Pl; p=P2} => p2PlVerbalSuffix ;
+        {n=Pl; p=P3} => p3PlVerbalSuffix
       } ;
 
     --  Adds a suffix to the base given as Str using Harmony.
@@ -147,26 +147,22 @@ resource SuffixTur = open Prelude, Predef, ResTur, HarmonyTur in {
       \baseTable,har,suf -> (baseTable ! suf.stemT) + suf.st ! har.con ! har.vow ;
 
 
-    regSuffix larC larV =
-	{
-	  st = regH4Suffix larC larV ;
-	  stemT = getBeginType larC ;
-	} ;
+    regSuffix larC larV = {
+      st = regH4Suffix larC larV ;
+      stemT = getBeginType larC ;
+    } ;
 
-    regSuffix2 larC larV =
-	{
-	  st = regH4Suffix2 larC larV ;
-	  stemT = getBeginType larC ;
-	} ;
+    regSuffix2 larC larV = {
+      st = regH4Suffix2 larC larV ;
+      stemT = getBeginType larC ;
+    } ;
 
-
-    regSuffix21 larC larV =
-          {
+    regSuffix21 larC larV = {
 	    st = table {
-		  SCon z => (regH4Suffix2 larC larV) ! SCon z ;
-		  SVow   => (regH4Suffix larC larV)  ! SVow
-		 } ;
-            stemT = getBeginType larC ;
+        SCon z => (regH4Suffix2 larC larV) ! SCon z ;
+        SVow   => (regH4Suffix larC larV)  ! SVow
+      } ;
+      stemT = getBeginType larC ;
 	  } ;
 
     --  Constructs suffix table for a one syllable suffix
@@ -285,23 +281,26 @@ resource SuffixTur = open Prelude, Predef, ResTur, HarmonyTur in {
                -> SuffixTable =
         \lirV,lirC ->
           table {
-            SVow => table {
-                  I_Har => lirV.p1 ;
-                  Ih_Har => lirV.p2 ;
-                  U_Har => lirV.p3 ;
-                  Uh_Har => lirV.p4
-            } ;
-            SCon Soft => table {
-              I_Har => lirC.p1 ;
-              Ih_Har => lirC.p2 ;
-              U_Har => lirC.p3 ;
-              Uh_Har => lirC.p4
-            } ;
-            SCon Hard => table {
-              I_Har => lirC.p5 ;
-              Ih_Har => lirC.p6 ;
-              U_Har => lirC.p7 ;
-              Uh_Har => lirC.p8
-            }
+            SVow =>
+              table {
+                I_Har => lirV.p1 ;
+                Ih_Har => lirV.p2 ;
+                U_Har => lirV.p3 ;
+                Uh_Har => lirV.p4
+              } ;
+            SCon Soft =>
+              table {
+                I_Har => lirC.p1 ;
+                Ih_Har => lirC.p2 ;
+                U_Har => lirC.p3 ;
+                Uh_Har => lirC.p4
+              } ;
+            SCon Hard =>
+              table {
+                I_Har => lirC.p5 ;
+                Ih_Har => lirC.p6 ;
+                U_Har => lirC.p7 ;
+                Uh_Har => lirC.p8
+              }
           } ;
 }
