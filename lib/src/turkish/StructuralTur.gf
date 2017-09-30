@@ -94,4 +94,6 @@ concrete StructuralTur of Structural = CatTur **
 
     many_Det = mkDet "birçok" Sg NoGen ;
 
+    all_Predet = {s = "her"} ;
+
 }
