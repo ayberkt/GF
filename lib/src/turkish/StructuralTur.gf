@@ -78,9 +78,9 @@ concrete StructuralTur of Structural = CatTur **
     between_Prep =
       mkPrep "arasındaki" Gen ;
 
-    and_Conj = ss "ile" ;
+    and_Conj = mkConj "ile" ;
 
-    or_Conj = ss "veya" ;
+    or_Conj = mkConj "veya" ;
 
     yes_Utt = ss "evet" ;
     no_Utt  = ss "hayır" ;
