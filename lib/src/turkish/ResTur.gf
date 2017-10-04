@@ -19,20 +19,21 @@ resource ResTur = ParamX ** open Prelude, Predef, HarmonyTur in {
 
     agrP3 : Number -> Agr ;
     agrP3 n = {n = n; p = P3} ;
--- For $Adjective$
+    -- For $Adjective$
   oper
     Adjective = Noun ** { adv : Str } ;
--- For $Verb$.
 
-  param
-    VForm = 
-       VProg      Agr
-     | VPast      Agr
-     | VFuture    Agr
-     | VAorist    Agr
-     | VImperative
-     | VInfinitive
-     ;
+    -- For $Verb$.
+
+    param
+      VForm =
+        VProg      Agr
+      | VPast      Agr
+      | VFuture    Agr
+      | VAorist    Agr
+      | VImperative
+      | VInfinitive
+      ;
 
     UseGen = NoGen | YesGen Agr | UseIndef ;
 
