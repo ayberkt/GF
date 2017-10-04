@@ -103,4 +103,6 @@ concrete StructuralTur of Structural = CatTur **
     because_Subj = {s = "çünkü"} ;
 
     here_Adv = {s = "burada"} ;
+
+    everywhere_Adv = {s = "her yerde"} ;
 }
