@@ -85,4 +85,9 @@ resource ResTur = ParamX ** open Prelude, Predef, HarmonyTur in {
       mkConj : Str -> Conj ;
       mkConj : Str -> Str -> Conj ;
     } ;
+
+    mkConj = overload {
+      mkConj : Str -> Conj         = \s      -> {s1 = s  ; s2 = [] ; ct = Infix} ;
+      mkConj : Str -> Str -> Conj  = \s1, s2 -> {s1 = s1 ; s2 = s2 ; ct = Mixfix} ;
+    } ;
 }
