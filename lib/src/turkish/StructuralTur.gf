@@ -107,4 +107,6 @@ concrete StructuralTur of Structural = CatTur **
     everywhere_Adv = {s = "her yerde"} ;
 
     if_Subj = {s = "eğer"} ;
+
+    both7and_DConj = mkConj "hem" "hem de" ;
 }
