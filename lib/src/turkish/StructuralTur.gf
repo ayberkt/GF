@@ -96,4 +96,6 @@ concrete StructuralTur of Structural = CatTur **
 
     all_Predet = {s = "her"} ;
 
+    almost_AdA = {s = "neredeyse"} ;
+
 }
