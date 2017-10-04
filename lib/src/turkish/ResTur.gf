@@ -16,6 +16,7 @@ resource ResTur = ParamX ** open Prelude, Predef, HarmonyTur in {
     Agr = {n : Number ; p : Person} ;
     Noun = {s : Number => Case => Str; gen : Number => Agr => Str; harmony : Harmony} ;
     Pron = {s : Case => Str; a : Agr} ;
+    Conj = {s1 : Str ; s2 : Str ; ct : ConjType} ;
 
     agrP3 : Number -> Agr ;
     agrP3 n = {n = n; p = P3} ;
@@ -77,4 +78,9 @@ resource ResTur = ParamX ** open Prelude, Predef, HarmonyTur in {
 
     mkDet : Str -> Number -> UseGen -> {s : Str; n : Number; useGen : UseGen} =
       \s, n, ug -> {s = s; n = n; useGen = ug} ;
+
+    mkConj : overload {
+      mkConj : Str -> Conj ;
+      mkConj : Str -> Str -> Conj ;
+    } ;
 }
