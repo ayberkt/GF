@@ -98,4 +98,6 @@ concrete StructuralTur of Structural = CatTur **
 
     almost_AdA = {s = "neredeyse"} ;
 
+    although_Subj = {s = "buna rağmen"} ;
+
 }
