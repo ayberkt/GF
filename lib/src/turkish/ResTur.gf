@@ -36,6 +36,8 @@ resource ResTur = ParamX ** open Prelude, Predef, HarmonyTur in {
       | VInfinitive
       ;
 
+    param ConjType = Infix | Mixfix ;
+
     UseGen = NoGen | YesGen Agr | UseIndef ;
 
   oper
