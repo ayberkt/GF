@@ -100,4 +100,5 @@ concrete StructuralTur of Structural = CatTur **
 
     although_Subj = {s = "buna rağmen"} ;
 
+    because_Subj = {s = "çünkü"} ;
 }
