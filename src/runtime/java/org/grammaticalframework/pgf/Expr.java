@@ -87,7 +87,7 @@ public class Expr implements Serializable {
 		 * a function application, then it is decomposed into 
 		 * a function name and a list of arguments. If this is not 
 		 * an application then the result is null. */
-		public native ExprApplication unApply();
+		public native ExprApplication unApp();
 
 		/** If the method is called on an expression which is 
 		 * a meta variable, then it will return the variable's id.
@@ -99,10 +99,17 @@ public class Expr implements Serializable {
 		 * If this is not a string literal then the result is null. */
 		public native String unStr();
 
+		/** An implementation for the visitor pattern. The method uses
+		 * reflection to find the relevant methods from the visitor object */
+		public native void visit(Object visitor);
+
 		/** Returns the expression as a string in the GF syntax */
 		public String toString() {
 			return showExpr(ref);
 		}
+
+		/** Computes the number of functions in the expression */
+		public native int size();
 
 		/** Reads a string in the GF syntax for abstract expressions
 		 * and returns an object representing the expression. */

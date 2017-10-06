@@ -3,8 +3,8 @@ module GF.Compile.Export where
 import PGF
 import PGF.Internal(ppPGF)
 import GF.Compile.PGFtoHaskell
+import GF.Compile.PGFtoJava
 import GF.Compile.PGFtoProlog
-import GF.Compile.PGFtoLProlog
 import GF.Compile.PGFtoJS
 import GF.Compile.PGFtoPython
 import GF.Infra.Option
@@ -37,8 +37,8 @@ exportPGF opts fmt pgf =
       FmtJavaScript   -> multi "js"  pgf2js
       FmtPython       -> multi "py"  pgf2python
       FmtHaskell      -> multi "hs"  (grammar2haskell opts name)
+      FmtJava         -> multi "java" (grammar2java opts name)
       FmtProlog       -> multi "pl"  grammar2prolog
-      FmtLambdaProlog -> multi "mod" grammar2lambdaprolog_mod ++ multi "sig" grammar2lambdaprolog_sig
       FmtBNF          -> single "bnf"   bnfPrinter
       FmtEBNF         -> single "ebnf"  (ebnfPrinter opts)
       FmtSRGS_XML     -> single "grxml" (srgsXmlPrinter opts)

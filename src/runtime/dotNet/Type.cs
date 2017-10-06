@@ -35,7 +35,7 @@ namespace PGFSharp
         /// </summary>
         /// <param name="typeStr"></param>
         /// <returns></returns>
-        public Type ReadType(string typeStr)
+        public static Type ReadType(string typeStr)
         {
             var tmp_pool = new NativeGU.NativeMemoryPool();
             var exn = new NativeGU.NativeExceptionContext(tmp_pool);
@@ -43,7 +43,7 @@ namespace PGFSharp
             using (var strNative = new Native.NativeString(typeStr))
             {
                 var in_ = NativeGU.gu_data_in(strNative.Ptr, strNative.Size, tmp_pool.Ptr);
-                var typ = Native.pgf_read_type(in_, result_pool.Ptr, exn.Ptr);
+                var typ = Native.pgf_read_type(in_, result_pool.Ptr, tmp_pool.Ptr, exn.Ptr);
                 if (exn.IsRaised || typ == IntPtr.Zero)
                 {
                     throw new PGFError();
@@ -73,7 +73,7 @@ namespace PGFSharp
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        private struct PgfType
+        internal struct PgfType
         {
             public IntPtr hypos; // GuSeq of PgfHypo
             public IntPtr cid;

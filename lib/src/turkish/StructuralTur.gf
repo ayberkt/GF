@@ -90,6 +90,7 @@ concrete StructuralTur of Structural = CatTur **
     but_PConj = ss "ama" ;
 
     everybody_NP  = mkNP (mkN "herkes") Sg P3 ;
+    
     everything_NP = mkNP (mkN "herşey") Sg P3 ;
 
     many_Det = mkDet "birçok" Sg NoGen ;
@@ -109,4 +110,5 @@ concrete StructuralTur of Structural = CatTur **
     if_Subj = {s = "eğer"} ;
 
     both7and_DConj = mkConj "hem" "hem de" ;
+
 }

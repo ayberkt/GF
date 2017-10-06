@@ -14,11 +14,12 @@
 -------------------------------------------------
 
 #include <pgf/pgf.h>
+#include <pgf/linearizer.h>
 #include <gu/enum.h>
 #include <gu/exn.h>
 
 module PGF2 (-- * PGF
-             PGF,readPGF,
+             PGF,readPGF,showPGF,
 
              -- * Identifiers
              CId,
@@ -26,20 +27,25 @@ module PGF2 (-- * PGF
              -- * Abstract syntax
              AbsName,abstractName,
              -- ** Categories
-             Cat,categories,
+             Cat,categories,categoryContext,
              -- ** Functions
-             Fun,functions, functionsByCat, functionType, hasLinearization,
+             Fun, functions, functionsByCat,
+             functionType, functionIsConstructor, hasLinearization,
              -- ** Expressions
-             Expr,showExpr,readExpr,
+             Expr,showExpr,readExpr,pExpr,
              mkAbs,unAbs,
              mkApp,unApp,
              mkStr,unStr,
              mkInt,unInt,
              mkFloat,unFloat,
              mkMeta,unMeta,
+             mkCId,
+             exprHash, exprSize, exprFunctions, exprSubstitute,
+             treeProbability,
+
              -- ** Types
              Type, Hypo, BindType(..), startCat,
-             readType, showType,
+             readType, showType, showContext,
              mkType, unType,
 
              -- ** Type checking
@@ -49,14 +55,16 @@ module PGF2 (-- * PGF
              compute,
 
              -- * Concrete syntax
-             ConcName,Concr,languages,
+             ConcName,Concr,languages,concreteName,languageCode,
+
              -- ** Linearization
-             linearize,linearizeAll,
+             linearize,linearizeAll,tabularLinearize,tabularLinearizeAll,bracketedLinearize,
              FId, LIndex, BracketedString(..), showBracketedString, flattenBracketedString,
+             printName,
 
              alignWords,
              -- ** Parsing
-             parse, parseWithHeuristics,
+             ParseOutput(..), parse, parseWithHeuristics,
              -- ** Sentence Lookup
              lookupSentence,
              -- ** Generation
@@ -64,7 +72,8 @@ module PGF2 (-- * PGF
              -- ** Morphological Analysis
              MorphoAnalysis, lookupMorpho, fullFormLexicon,
              -- ** Visualizations
-             graphvizAbstractTree,graphvizParseTree,
+             GraphvizOptions(..), graphvizDefaults,
+             graphvizAbstractTree, graphvizParseTree, graphvizWordAlignment,
 
              -- * Exceptions
              PGFError(..),
@@ -129,6 +138,17 @@ readPGF fpath =
      pgfFPtr <- newForeignPtr gu_pool_finalizer pool
      return (PGF pgf (touchForeignPtr pgfFPtr))
 
+showPGF :: PGF -> String
+showPGF p =
+  unsafePerformIO $
+    withGuPool $ \tmpPl ->
+      do (sb,out) <- newOut tmpPl
+         exn <- gu_new_exn tmpPl
+         pgf_print (pgf p) out exn
+         touchPGF p
+         s <- gu_string_buf_freeze sb tmpPl
+         peekUtf8CString s
+
 -- | List of all languages available in the grammar.
 languages :: PGF -> Map.Map ConcName Concr
 languages p =
@@ -147,6 +167,15 @@ languages p =
       name  <- peekUtf8CString (castPtr key)
       concr <- fmap (\ptr -> Concr ptr (touchPGF p)) $ peek (castPtr value)
       writeIORef ref $! Map.insert name concr langs
+
+-- | The abstract language name is the name of the top-level
+-- abstract module
+concreteName :: Concr -> ConcName
+concreteName c = unsafePerformIO (peekUtf8CString =<< pgf_concrete_name (concr c))
+
+languageCode :: Concr -> String
+languageCode c = unsafePerformIO (peekUtf8CString =<< pgf_language_code (concr c))
+
 
 -- | Generates an exhaustive possibly infinite list of
 -- all abstract syntax expressions of the given type. 
@@ -202,15 +231,25 @@ unloadConcr :: Concr -> IO ()
 unloadConcr c = pgf_concrete_unload (concr c)
 
 -- | The type of a function
-functionType :: PGF -> Fun -> Type
+functionType :: PGF -> Fun -> Maybe Type
 functionType p fn =
   unsafePerformIO $
   withGuPool $ \tmpPl -> do
     c_fn <- newUtf8CString fn tmpPl
     c_type <- pgf_function_type (pgf p) c_fn
-    if c_type == nullPtr
-      then throwIO (PGFError ("Function '"++fn++"' is not defined"))
-      else return (Type c_type (touchPGF p))
+    return (if c_type == nullPtr
+              then Nothing
+              else Just (Type c_type (touchPGF p)))
+
+-- | The type of a function
+functionIsConstructor :: PGF -> Fun -> Bool
+functionIsConstructor p fn =
+  unsafePerformIO $
+  withGuPool $ \tmpPl -> do
+    c_fn <- newUtf8CString fn tmpPl
+    res <- pgf_function_is_constructor (pgf p) c_fn
+    touchPGF p
+    return (res /= 0)
 
 -- | Checks an expression against a specified type.
 checkExpr :: PGF -> Expr -> Type -> Either String Expr
@@ -306,38 +345,128 @@ compute (PGF p _) (Expr c_expr touch1) =
               gu_pool_free exprPl
               throwIO (PGFError msg)
 
+treeProbability :: PGF -> Expr -> Float
+treeProbability (PGF p _) (Expr c_expr touch1) =
+  unsafePerformIO $ do
+    res <- pgf_compute_tree_probability p c_expr
+    touch1
+    return (realToFrac res)
+
+exprHash :: Int32 -> Expr -> Int32
+exprHash h (Expr c_expr touch1) =
+  unsafePerformIO $ do
+    h <- pgf_expr_hash (fromIntegral h) c_expr
+    touch1
+    return (fromIntegral h)
+
+exprSize :: Expr -> Int
+exprSize (Expr c_expr touch1) =
+  unsafePerformIO $ do
+    size <- pgf_expr_size c_expr
+    touch1
+    return (fromIntegral size)
+
+exprFunctions :: Expr -> [Fun]
+exprFunctions (Expr c_expr touch) =
+  unsafePerformIO $
+  withGuPool $ \tmpPl -> do
+    seq <- pgf_expr_functions c_expr tmpPl
+    len <- (#peek GuSeq, len) seq
+    arr <- peekArray (fromIntegral (len :: CInt)) (seq `plusPtr` (#offset GuSeq, data))
+    funs <- mapM peekUtf8CString arr
+    touch
+    return funs
+
+exprSubstitute :: Expr -> [Expr] -> Expr
+exprSubstitute (Expr c_expr touch) meta_values =
+  unsafePerformIO $
+  withGuPool $ \tmpPl -> do
+    c_meta_values <- newSequence (#size PgfExpr) pokeExpr meta_values tmpPl
+    exprPl <- gu_new_pool
+    c_expr <- pgf_expr_substitute c_expr c_meta_values exprPl
+    touch
+    exprFPl <- newForeignPtr gu_pool_finalizer exprPl
+    let touch' = sequence_ (touchForeignPtr exprFPl : map touchExpr meta_values)
+    return (Expr c_expr touch')
+  where
+    pokeExpr ptr (Expr c_expr _) = poke ptr c_expr
+
 -----------------------------------------------------------------------------
 -- Graphviz
 
+data GraphvizOptions = GraphvizOptions {noLeaves :: Bool,
+                                        noFun :: Bool,
+                                        noCat :: Bool,
+                                        noDep :: Bool,
+                                        nodeFont :: String,
+                                        leafFont :: String,
+                                        nodeColor :: String,
+                                        leafColor :: String,
+                                        nodeEdgeStyle :: String,
+                                        leafEdgeStyle :: String
+                                       }
+
+graphvizDefaults = GraphvizOptions False False False True "" "" "" "" "" ""
+
 -- | Renders an abstract syntax tree in a Graphviz format.
-graphvizAbstractTree :: PGF -> Expr -> String
-graphvizAbstractTree p e =
+graphvizAbstractTree :: PGF -> GraphvizOptions -> Expr -> String
+graphvizAbstractTree p opts e =
   unsafePerformIO $
     withGuPool $ \tmpPl ->
       do (sb,out) <- newOut tmpPl
          exn <- gu_new_exn tmpPl
-         pgf_graphviz_abstract_tree (pgf p) (expr e) out exn
+         c_opts <- newGraphvizOptions tmpPl opts
+         pgf_graphviz_abstract_tree (pgf p) (expr e) c_opts out exn
          touchExpr e
          s <- gu_string_buf_freeze sb tmpPl
          peekUtf8CString s
 
 
-graphvizParseTree :: Concr -> Expr -> String
-graphvizParseTree c e =
+graphvizParseTree :: Concr -> GraphvizOptions -> Expr -> String
+graphvizParseTree c opts e =
   unsafePerformIO $
     withGuPool $ \tmpPl ->
       do (sb,out) <- newOut tmpPl
          exn <- gu_new_exn tmpPl
-         pgf_graphviz_parse_tree (concr c) (expr e) out exn
+         c_opts <- newGraphvizOptions tmpPl opts
+         pgf_graphviz_parse_tree (concr c) (expr e) c_opts out exn
          touchExpr e
          s <- gu_string_buf_freeze sb tmpPl
          peekUtf8CString s
+
+graphvizWordAlignment :: [Concr] -> GraphvizOptions -> Expr -> String
+graphvizWordAlignment cs opts e =
+  unsafePerformIO $
+    withGuPool $ \tmpPl ->
+    withArrayLen (map concr cs) $ \n_concrs ptr ->
+      do (sb,out) <- newOut tmpPl
+         exn <- gu_new_exn tmpPl
+         c_opts <- newGraphvizOptions tmpPl opts
+         pgf_graphviz_word_alignment ptr (fromIntegral n_concrs) (expr e) c_opts out exn
+         touchExpr e
+         s <- gu_string_buf_freeze sb tmpPl
+         peekUtf8CString s
+
+newGraphvizOptions :: Ptr GuPool -> GraphvizOptions -> IO (Ptr PgfGraphvizOptions)
+newGraphvizOptions pool opts = do
+  c_opts <- gu_malloc pool (#size PgfGraphvizOptions)
+  (#poke PgfGraphvizOptions, noLeaves) c_opts (if noLeaves opts then 1 else 0 :: CInt)
+  (#poke PgfGraphvizOptions, noFun)    c_opts (if noFun    opts then 1 else 0 :: CInt)
+  (#poke PgfGraphvizOptions, noCat)    c_opts (if noCat    opts then 1 else 0 :: CInt)
+  (#poke PgfGraphvizOptions, noDep)    c_opts (if noDep    opts then 1 else 0 :: CInt)
+  newUtf8CString (nodeFont opts) pool >>= (#poke PgfGraphvizOptions, nodeFont) c_opts
+  newUtf8CString (leafFont opts) pool >>= (#poke PgfGraphvizOptions, leafFont) c_opts
+  newUtf8CString (nodeColor opts) pool >>= (#poke PgfGraphvizOptions, nodeColor) c_opts
+  newUtf8CString (leafColor opts) pool >>= (#poke PgfGraphvizOptions, leafColor) c_opts
+  newUtf8CString (nodeEdgeStyle opts) pool >>= (#poke PgfGraphvizOptions, nodeEdgeStyle) c_opts
+  newUtf8CString (leafEdgeStyle opts) pool >>= (#poke PgfGraphvizOptions, leafEdgeStyle) c_opts
+  return c_opts
 
 -----------------------------------------------------------------------------
 -- Functions using Concr
 -- Morpho analyses, parsing & linearization
 
-type MorphoAnalysis = (Fun,String,Float)
+type MorphoAnalysis = (Fun,Cat,Float)
 
 lookupMorpho :: Concr -> String -> [MorphoAnalysis]
 lookupMorpho (Concr concr master) sent =
@@ -387,7 +516,15 @@ getAnalysis ref self c_lemma c_anal prob exn = do
   anal  <- peekUtf8CString c_anal
   writeIORef ref ((lemma, anal, prob):ans)
 
-parse :: Concr -> Type -> String -> Either String [(Expr,Float)]
+-- | This data type encodes the different outcomes which you could get from the parser.
+data ParseOutput
+  = ParseFailed Int String         -- ^ The integer is the position in number of unicode characters where the parser failed.
+                                   -- The string is the token where the parser have failed.
+  | ParseOk [(Expr,Float)]         -- ^ If the parsing and the type checking are successful we get a list of abstract syntax trees.
+                                   -- The list should be non-empty.
+  | ParseIncomplete                -- ^ The sentence is not complete.
+
+parse :: Concr -> Type -> String -> ParseOutput
 parse lang ty sent = parseWithHeuristics lang ty sent (-1.0) []
 
 parseWithHeuristics :: Concr      -- ^ the language with which we parse
@@ -404,7 +541,7 @@ parseWithHeuristics :: Concr      -- ^ the language with which we parse
                                   -- the input sentence; the current offset in the sentence.
                                   -- If a literal has been recognized then the output should
                                   -- be Just (expr,probability,end_offset)
-                    -> Either String [(Expr,Float)]
+                    -> ParseOutput
 parseWithHeuristics lang (Type ctype _) sent heuristic callbacks =
   unsafePerformIO $
     do exprPl  <- gu_new_pool
@@ -417,11 +554,19 @@ parseWithHeuristics lang (Type ctype _) sent heuristic callbacks =
        if failed
          then do is_parse_error <- gu_exn_caught exn gu_exn_type_PgfParseError
                  if is_parse_error
-                   then do c_tok <- (#peek GuExn, data.data) exn
-                           tok <- peekUtf8CString c_tok
-                           gu_pool_free parsePl
-                           gu_pool_free exprPl
-                           return (Left tok)
+                   then do c_err <- (#peek GuExn, data.data) exn
+                           c_incomplete <- (#peek PgfParseError, incomplete) c_err
+                           if (c_incomplete :: CInt) == 0
+                             then do c_offset <- (#peek PgfParseError, offset) c_err
+                                     token_ptr <- (#peek PgfParseError, token_ptr) c_err
+                                     token_len <- (#peek PgfParseError, token_len) c_err
+                                     tok <- peekUtf8CStringLen token_ptr token_len
+                                     gu_pool_free parsePl
+                                     gu_pool_free exprPl
+                                     return (ParseFailed (fromIntegral (c_offset :: CInt)) tok)
+                             else do gu_pool_free parsePl
+                                     gu_pool_free exprPl
+                                     return ParseIncomplete
                    else do is_exn <- gu_exn_caught exn gu_exn_type_PgfExn
                            if is_exn
                              then do c_msg <- (#peek GuExn, data.data) exn
@@ -435,7 +580,7 @@ parseWithHeuristics lang (Type ctype _) sent heuristic callbacks =
          else do parseFPl <- newForeignPtr gu_pool_finalizer parsePl
                  exprFPl  <- newForeignPtr gu_pool_finalizer exprPl
                  exprs    <- fromPgfExprEnum enum parseFPl (touchConcr lang >> touchForeignPtr exprFPl)
-                 return (Right exprs)
+                 return (ParseOk exprs)
 
 mkCallbacksMap :: Ptr PgfConcr -> [(String, Int -> Int -> Maybe (Expr,Float,Int))] -> Ptr GuPool -> IO (Ptr PgfCallbacksMap)
 mkCallbacksMap concr callbacks pool = do
@@ -463,7 +608,7 @@ mkCallbacksMap concr callbacks pool = do
                                              c_str <- gu_string_buf_freeze sb tmpPl
 
                                              guin <- gu_string_in c_str tmpPl
-                                             pgf_read_expr guin out_pool exn
+                                             pgf_read_expr guin out_pool tmpPl exn
 
                                     ep <- gu_malloc out_pool (#size PgfExprProb)
                                     (#poke PgfExprProb, expr) ep c_e
@@ -502,7 +647,7 @@ parseWithOracle :: Concr      -- ^ the language with which we parse
                 -> Cat        -- ^ the start category
                 -> String     -- ^ the input sentence
                 -> Oracle
-                -> Either String [(Expr,Float)]
+                -> ParseOutput
 parseWithOracle lang cat sent (predict,complete,literal) =
   unsafePerformIO $
     do parsePl <- gu_new_pool
@@ -519,11 +664,19 @@ parseWithOracle lang cat sent (predict,complete,literal) =
        if failed
          then do is_parse_error <- gu_exn_caught exn gu_exn_type_PgfParseError
                  if is_parse_error
-                   then do c_tok <- (#peek GuExn, data.data) exn
-                           tok <- peekUtf8CString c_tok
-                           gu_pool_free parsePl
-                           gu_pool_free exprPl
-                           return (Left tok)
+                   then do c_err <- (#peek GuExn, data.data) exn
+                           c_incomplete <- (#peek PgfParseError, incomplete) c_err
+                           if (c_incomplete :: CInt) == 0
+                             then do c_offset <- (#peek PgfParseError, offset) c_err
+                                     token_ptr <- (#peek PgfParseError, token_ptr) c_err
+                                     token_len <- (#peek PgfParseError, token_len) c_err
+                                     tok <- peekUtf8CStringLen token_ptr token_len
+                                     gu_pool_free parsePl
+                                     gu_pool_free exprPl
+                                     return (ParseFailed (fromIntegral (c_offset :: CInt)) tok)
+                             else do gu_pool_free parsePl
+                                     gu_pool_free exprPl
+                                     return ParseIncomplete
                    else do is_exn <- gu_exn_caught exn gu_exn_type_PgfExn
                            if is_exn
                              then do c_msg <- (#peek GuExn, data.data) exn
@@ -537,7 +690,7 @@ parseWithOracle lang cat sent (predict,complete,literal) =
          else do parseFPl <- newForeignPtr gu_pool_finalizer parsePl
                  exprFPl  <- newForeignPtr gu_pool_finalizer exprPl
                  exprs    <- fromPgfExprEnum enum parseFPl (touchConcr lang >> touchForeignPtr exprFPl)
-                 return (Right exprs)
+                 return (ParseOk exprs)
   where
     oracleWrapper oracle catPtr lblPtr offset = do
       cat <- peekUtf8CString catPtr
@@ -562,7 +715,7 @@ parseWithOracle lang cat sent (predict,complete,literal) =
                                   c_str <- gu_string_buf_freeze sb tmpPl
 
                                   guin <- gu_string_in c_str tmpPl
-                                  pgf_read_expr guin out_pool exn
+                                  pgf_read_expr guin out_pool tmpPl exn
 
                          ep <- gu_malloc out_pool (#size PgfExprProb)
                          (#poke PgfExprProb, expr) ep c_e
@@ -573,8 +726,9 @@ parseWithOracle lang cat sent (predict,complete,literal) =
 -- | Returns True if there is a linearization defined for that function in that language
 hasLinearization :: Concr -> Fun -> Bool
 hasLinearization lang id = unsafePerformIO $
-  withGuPool $ \pl ->
-    newUtf8CString id pl >>= pgf_has_linearization (concr lang)
+  withGuPool $ \pl -> do
+    res <- newUtf8CString id pl >>= pgf_has_linearization (concr lang)
+    return (res /= 0)
 
 -- | Linearizes an expression as a string in the language
 linearize :: Concr -> Expr -> String
@@ -640,6 +794,65 @@ linearizeAll lang e = unsafePerformIO $
         else do gu_pool_free pl
                 throwIO (PGFError "The abstract tree cannot be linearized")
 
+-- | Generates a table of linearizations for an expression
+tabularLinearize :: Concr -> Expr -> [(String, String)]
+tabularLinearize lang e = 
+  case tabularLinearizeAll lang e of
+    (lins:_) -> lins
+    _        -> []
+
+-- | Generates a table of linearizations for an expression
+tabularLinearizeAll :: Concr -> Expr -> [[(String, String)]]
+tabularLinearizeAll lang e = unsafePerformIO $
+  withGuPool $ \tmpPl -> do
+    exn <- gu_new_exn tmpPl
+    cts <- pgf_lzr_concretize (concr lang) (expr e) exn tmpPl
+    failed <- gu_exn_is_raised exn
+    if failed
+      then throwExn exn
+      else collect cts exn tmpPl
+  where
+    collect cts exn tmpPl = do
+      ctree <- alloca $ \ptr -> do gu_enum_next cts ptr tmpPl
+                                   peek ptr
+      if ctree == nullPtr
+        then do touchExpr e
+                return []
+        else do labels <- alloca $ \p_n_lins ->
+                          alloca $ \p_labels -> do
+                            pgf_lzr_get_table (concr lang) ctree p_n_lins p_labels
+                            n_lins <- peek p_n_lins
+                            labels <- peek p_labels
+                            labels <- peekArray (fromIntegral n_lins) labels
+                            labels <- mapM peekCString labels
+                            return labels
+                lins <- collectTable lang ctree 0 labels exn tmpPl
+                linss <- collect cts exn tmpPl
+                return (lins : linss)
+
+    collectTable lang ctree lin_idx []             exn tmpPl = return []
+    collectTable lang ctree lin_idx (label:labels) exn tmpPl = do
+      (sb,out) <- newOut tmpPl
+      pgf_lzr_linearize_simple (concr lang) ctree lin_idx out exn tmpPl
+      failed <- gu_exn_is_raised exn
+      if failed
+        then do is_nonexist <- gu_exn_caught exn gu_exn_type_PgfLinNonExist
+                if is_nonexist
+                  then collectTable lang ctree (lin_idx+1) labels exn tmpPl
+                  else throwExn exn
+        else do lin <- gu_string_buf_freeze sb tmpPl
+                s  <- peekUtf8CString lin
+                ss <- collectTable lang ctree (lin_idx+1) labels exn tmpPl
+                return ((label,s):ss)
+
+    throwExn exn = do
+      is_exn <- gu_exn_caught exn gu_exn_type_PgfExn
+      if is_exn
+        then do c_msg <- (#peek GuExn, data.data) exn
+                msg <- peekUtf8CString c_msg
+                throwIO (PGFError msg)
+        else do throwIO (PGFError "The abstract tree cannot be linearized")
+
 type FId    = Int
 type LIndex = Int
 
@@ -677,11 +890,90 @@ flattenBracketedString :: BracketedString -> [String]
 flattenBracketedString (Leaf w)              = [w]
 flattenBracketedString (Bracket _ _ _ _ bss) = concatMap flattenBracketedString bss
 
+bracketedLinearize :: Concr -> Expr -> [BracketedString]
+bracketedLinearize lang e = unsafePerformIO $
+  withGuPool $ \pl -> 
+    do exn <- gu_new_exn pl
+       cts <- pgf_lzr_concretize (concr lang) (expr e) exn pl
+       failed <- gu_exn_is_raised exn
+       if failed
+         then throwExn exn
+         else do ctree <- alloca $ \ptr -> do gu_enum_next cts ptr pl
+                                              peek ptr
+                 if ctree == nullPtr
+                   then do touchExpr e
+                           return []
+                   else do ctree <- pgf_lzr_wrap_linref ctree pl
+                           ref <- newIORef ([],[])
+                           allocaBytes (#size PgfLinFuncs) $ \pLinFuncs  ->
+                            alloca $ \ppLinFuncs -> do
+                              fptr_symbol_token <- wrapSymbolTokenCallback (symbol_token ref)
+                              fptr_begin_phrase <- wrapPhraseCallback (begin_phrase ref)
+                              fptr_end_phrase   <- wrapPhraseCallback (end_phrase ref)
+                              fptr_symbol_ne    <- wrapSymbolNonExistCallback (symbol_ne exn)
+                              fptr_symbol_meta  <- wrapSymbolMetaCallback (symbol_meta ref)
+                              (#poke PgfLinFuncs, symbol_token) pLinFuncs fptr_symbol_token
+                              (#poke PgfLinFuncs, begin_phrase) pLinFuncs fptr_begin_phrase
+                              (#poke PgfLinFuncs, end_phrase)   pLinFuncs fptr_end_phrase
+                              (#poke PgfLinFuncs, symbol_ne)    pLinFuncs fptr_symbol_ne
+                              (#poke PgfLinFuncs, symbol_bind)  pLinFuncs nullPtr
+                              (#poke PgfLinFuncs, symbol_capit) pLinFuncs nullPtr
+                              (#poke PgfLinFuncs, symbol_meta)  pLinFuncs fptr_symbol_meta
+                              poke ppLinFuncs pLinFuncs
+                              pgf_lzr_linearize (concr lang) ctree 0 ppLinFuncs pl
+                              freeHaskellFunPtr fptr_symbol_token
+                              freeHaskellFunPtr fptr_begin_phrase
+                              freeHaskellFunPtr fptr_end_phrase
+                              freeHaskellFunPtr fptr_symbol_ne
+                              freeHaskellFunPtr fptr_symbol_meta
+                           failed <- gu_exn_is_raised exn
+                           if failed
+                             then do is_nonexist <- gu_exn_caught exn gu_exn_type_PgfLinNonExist
+                                     if is_nonexist
+                                       then return []
+                                       else throwExn exn
+                             else do (_,bs) <- readIORef ref
+                                     return (reverse bs)
+  where
+    symbol_token ref _ c_token = do
+      (stack,bs) <- readIORef ref
+      token <- peekUtf8CString c_token
+      writeIORef ref (stack,Leaf token : bs)
+
+    begin_phrase ref _ c_cat c_fid c_lindex c_fun = do
+      (stack,bs) <- readIORef ref
+      writeIORef ref (bs:stack,[])
+
+    end_phrase ref _ c_cat c_fid c_lindex c_fun = do
+      (bs':stack,bs) <- readIORef ref
+      cat <- peekUtf8CString c_cat
+      let fid    = fromIntegral c_fid
+      let lindex = fromIntegral c_lindex
+      fun <- peekUtf8CString c_fun
+      writeIORef ref (stack, Bracket cat fid lindex fun (reverse bs) : bs')
+
+    symbol_ne exn _ = do
+      gu_exn_raise exn gu_exn_type_PgfLinNonExist
+      return ()
+
+    symbol_meta ref _ meta_id = do
+      (stack,bs) <- readIORef ref
+      writeIORef ref (stack,Leaf "?" : bs)
+
+    throwExn exn = do
+      is_exn <- gu_exn_caught exn gu_exn_type_PgfExn
+      if is_exn
+        then do c_msg <- (#peek GuExn, data.data) exn
+                msg <- peekUtf8CString c_msg
+                throwIO (PGFError msg)
+        else do throwIO (PGFError "The abstract tree cannot be linearized")
+
 alignWords :: Concr -> Expr -> [(String, [Int])]
 alignWords lang e = unsafePerformIO $
   withGuPool $ \pl ->
     do exn <- gu_new_exn pl
        seq <- pgf_align_words (concr lang) (expr e) exn pl
+       touchConcr lang
        touchExpr e
        failed <- gu_exn_is_raised exn
        if failed
@@ -705,6 +997,18 @@ alignWords lang e = unsafePerformIO $
       n_fids <- (#peek PgfAlignmentPhrase, n_fids) ptr
       (fids :: [CInt]) <- peekArray (fromIntegral (n_fids :: CInt)) (ptr `plusPtr` (#offset PgfAlignmentPhrase, fids))
       return (phrase, map fromIntegral fids)
+
+printName :: Concr -> Fun -> Maybe String
+printName lang fun =
+  unsafePerformIO $
+  withGuPool $ \tmpPl -> do
+    c_fun  <- newUtf8CString fun tmpPl
+    c_name <- pgf_print_name (concr lang) c_fun
+    name   <- if c_name == nullPtr
+                then return Nothing
+                else fmap Just (peekUtf8CString c_name)
+    touchConcr lang
+    return name
 
 -- | List of all functions defined in the abstract syntax
 functions :: PGF -> [Fun]
@@ -775,8 +1079,38 @@ categories p =
       name  <- peekUtf8CString (castPtr key)
       writeIORef ref $! (name : names)
 
-categoryContext :: PGF -> Cat -> Maybe [Hypo]
-categoryContext pgf cat = Nothing -- !!! not implemented yet TODO
+categoryContext :: PGF -> Cat -> [Hypo]
+categoryContext p cat =
+  unsafePerformIO $
+    withGuPool $ \tmpPl ->
+      do c_cat <- newUtf8CString cat tmpPl
+         c_hypos <- pgf_category_context (pgf p) c_cat
+         if c_hypos == nullPtr
+           then return []
+           else do n_hypos <- (#peek GuSeq, len) c_hypos
+                   peekHypos (c_hypos `plusPtr` (#offset GuSeq, data)) 0 n_hypos
+  where
+    peekHypos :: Ptr a -> Int -> Int -> IO [Hypo]
+    peekHypos c_hypo i n
+      | i < n     = do cid <- (#peek PgfHypo, cid) c_hypo >>= peekUtf8CString
+                       c_ty <- (#peek PgfHypo, type) c_hypo
+                       bt  <- fmap toBindType ((#peek PgfHypo, bind_type) c_hypo)
+                       hs <- peekHypos (plusPtr c_hypo (#size PgfHypo)) (i+1) n
+                       return ((bt,cid,Type c_ty (touchPGF p)) : hs)
+      | otherwise = return []
+
+    toBindType :: CInt -> BindType
+    toBindType (#const PGF_BIND_TYPE_EXPLICIT) = Explicit
+    toBindType (#const PGF_BIND_TYPE_IMPLICIT) = Implicit
+
+categoryProb :: PGF -> Cat -> Float
+categoryProb p cat =
+  unsafePerformIO $
+    withGuPool $ \tmpPl ->
+      do c_cat <- newUtf8CString cat tmpPl
+         c_prob <- pgf_category_prob (pgf p) c_cat
+         touchPGF p
+         return (realToFrac c_prob)
 
 -----------------------------------------------------------------------------
 -- Helper functions
@@ -833,7 +1167,7 @@ nerc pgf (lang,concr) sentence lin_idx offset =
         ((lemma,cat),_) = maximumBy (compare `on` snd) (reverse ls)
         ls = [((fun,cat),p)
               |(fun,_,p)<-lookupMorpho concr name,
-                let cat=functionCat fun,
+                Just cat <- [functionCat fun],
                 cat/="Nationality"]
         name = trimRight (concat capwords)
     _ -> Nothing
@@ -845,7 +1179,7 @@ nerc pgf (lang,concr) sentence lin_idx offset =
         Just (y,xs') -> (y:ys,xs'')
           where (ys,xs'') = consume munch xs'
 
-    functionCat f = case unType (functionType pgf f) of (_,cat,_) -> cat
+    functionCat f = fmap ((\(_,c,_) -> c) . unType) (functionType pgf f)
 
 -- | Callback to parse arbitrary words as chunks (from
 -- ../java/org/grammaticalframework/pgf/UnknownLiteralCallback.java)

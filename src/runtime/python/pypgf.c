@@ -1163,7 +1163,10 @@ Iter_fetch_token(IterObject* self)
 
 	PyObject* py_tok = PyString_FromString(tp->tok);
 	PyObject* py_cat = PyString_FromString(tp->cat);
-	PyObject* res = Py_BuildValue("(f,O,O)", tp->prob, py_tok, py_cat);
+	PyObject* py_fun = PyString_FromString(tp->fun);
+	PyObject* res = Py_BuildValue("(f,O,O,O)", tp->prob, py_tok, py_cat, py_fun);
+	Py_DECREF(py_fun);
+	Py_DECREF(py_cat);
 	Py_DECREF(py_tok);
 
 	return res;
@@ -1391,7 +1394,7 @@ pypgf_literal_callback_match(PgfLiteralCallback* self, PgfConcr* concr,
 		                      gu_string_buf_length(sbuf),
 		                      tmp_pool);
 
-		ep->expr = pgf_read_expr(in, out_pool, err);
+		ep->expr = pgf_read_expr(in, out_pool, tmp_pool, err);
 		if (!gu_ok(err) || gu_variant_is_null(ep->expr)) {
 			PyErr_SetString(PGFError, "The expression cannot be parsed");
 			gu_pool_free(tmp_pool);
@@ -1545,13 +1548,28 @@ Concr_parse(ConcrObject* self, PyObject *args, PyObject *keywds)
 			GuString msg = (GuString) gu_exn_caught_data(parse_err);
 			PyErr_SetString(PGFError, msg);
 		} else if (gu_exn_caught(parse_err, PgfParseError)) {
-			GuString tok = (GuString) gu_exn_caught_data(parse_err);
-			PyObject* py_tok = PyString_FromString(tok);
-			PyObject_SetAttrString(ParseError, "token", py_tok);
-			PyErr_Format(ParseError, "Unexpected token: \"%s\"", tok);
-			Py_DECREF(py_tok);
+			PgfParseError* err = (PgfParseError*) gu_exn_caught_data(parse_err);
+			PyObject* py_offset = PyInt_FromLong(err->offset);
+			if (err->incomplete) {
+	            PyObject_SetAttrString(ParseError, "incomplete",  Py_True);
+	            PyObject_SetAttrString(ParseError, "offset",      py_offset);
+				PyErr_Format(ParseError, "The sentence is incomplete");
+			} else {
+				PyObject* py_tok    = PyString_FromStringAndSize(err->token_ptr,
+	                                                             err->token_len);
+	            PyObject_SetAttrString(ParseError, "incomplete",  Py_False);
+				PyObject_SetAttrString(ParseError, "offset",      py_offset);
+				PyObject_SetAttrString(ParseError, "token",       py_tok);
+#if PY_MAJOR_VERSION >= 3
+				PyErr_Format(ParseError, "Unexpected token: \"%U\"", py_tok);
+#else
+				PyErr_Format(ParseError, "Unexpected token: \"%s\"", PyString_AsString(py_tok));
+#endif
+				Py_DECREF(py_tok);
+			}
+			Py_DECREF(py_offset);
 		}
-		
+
 		Py_DECREF(pyres);
 		pyres = NULL;
 	}
@@ -1990,7 +2008,7 @@ static PyMemberDef Bracket_members[] = {
     {"fun", T_OBJECT_EX, offsetof(BracketObject, fun), 0,
      "the abstract function for this bracket"},
     {"fid", T_INT, offsetof(BracketObject, fid), 0,
-     "an unique id which identifies this bracket in the whole bracketed string"},
+     "an id which identifies this bracket in the bracketed string. If there are discontinuous phrases this id will be shared for all brackets belonging to the same phrase."},
     {"lindex", T_INT, offsetof(BracketObject, lindex), 0,
      "the constituent index"},
     {"children", T_OBJECT_EX, offsetof(BracketObject, children), 0,
@@ -2057,7 +2075,7 @@ pgf_bracket_lzn_symbol_token(PgfLinFuncs** funcs, PgfToken tok)
 }
 
 static void
-pgf_bracket_lzn_begin_phrase(PgfLinFuncs** funcs, PgfCId cat, int fid, int lindex, PgfCId fun)
+pgf_bracket_lzn_begin_phrase(PgfLinFuncs** funcs, PgfCId cat, int fid, size_t lindex, PgfCId fun)
 {
 	PgfBracketLznState* state = gu_container(funcs, PgfBracketLznState, funcs);
 	
@@ -2066,7 +2084,7 @@ pgf_bracket_lzn_begin_phrase(PgfLinFuncs** funcs, PgfCId cat, int fid, int linde
 }
 
 static void
-pgf_bracket_lzn_end_phrase(PgfLinFuncs** funcs, PgfCId cat, int fid, int lindex, PgfCId fun)
+pgf_bracket_lzn_end_phrase(PgfLinFuncs** funcs, PgfCId cat, int fid, size_t lindex, PgfCId fun)
 {
 	PgfBracketLznState* state = gu_container(funcs, PgfBracketLznState, funcs);
 
@@ -2281,7 +2299,7 @@ Concr_graphvizParseTree(ConcrObject* self, PyObject *args) {
 	GuStringBuf* sbuf = gu_new_string_buf(tmp_pool);
 	GuOut* out = gu_string_buf_out(sbuf);
 	
-	pgf_graphviz_parse_tree(self->concr, pyexpr->expr, out, err);
+	pgf_graphviz_parse_tree(self->concr, pyexpr->expr, pgf_default_graphviz_options, out, err);
 	if (!gu_ok(err)) {
 		if (gu_exn_caught(err, PgfExn)) {
 			GuString msg = (GuString) gu_exn_caught_data(err);
@@ -2599,6 +2617,24 @@ PGF_dealloc(PGFObject* self)
 	if (self->pool != NULL)
 		gu_pool_free(self->pool);
     Py_TYPE(self)->tp_free((PyObject*)self);
+}
+
+static PyObject *
+PGF_repr(PGFObject *self)
+{
+	GuPool* tmp_pool = gu_local_pool();
+
+	GuExn* err = gu_exn(tmp_pool);
+	GuStringBuf* sbuf = gu_new_string_buf(tmp_pool);
+	GuOut* out = gu_string_buf_out(sbuf);
+
+	pgf_print(self->pgf, out, err);
+
+	PyObject* pystr = PyString_FromStringAndSize(gu_string_buf_data(sbuf),
+	                                             gu_string_buf_length(sbuf));
+
+	gu_pool_free(tmp_pool);
+	return pystr;
 }
 
 static PyObject*
@@ -3075,7 +3111,7 @@ PGF_graphvizAbstractTree(PGFObject* self, PyObject *args) {
 	GuStringBuf* sbuf = gu_new_string_buf(tmp_pool);
 	GuOut* out = gu_string_buf_out(sbuf);
 	
-	pgf_graphviz_abstract_tree(self->pgf, pyexpr->expr, out, err);
+	pgf_graphviz_abstract_tree(self->pgf, pyexpr->expr, pgf_default_graphviz_options, out, err);
 	if (!gu_ok(err)) {
 		PyErr_SetString(PGFError, "The abstract tree cannot be visualized");
 		return NULL;
@@ -3221,7 +3257,7 @@ static PyTypeObject pgf_PGFType = {
     0,                         /*tp_as_mapping*/
     0,                         /*tp_hash */
     0,                         /*tp_call*/
-    0,                         /*tp_str*/
+    (reprfunc) PGF_repr,       /*tp_str*/
     0,                         /*tp_getattro*/
     0,                         /*tp_setattro*/
     0,                         /*tp_as_buffer*/
@@ -3295,7 +3331,7 @@ pgf_readExpr(PyObject *self, PyObject *args) {
 	GuExn* err = gu_new_exn(tmp_pool);
 
 	pyexpr->pool = gu_new_pool();
-	pyexpr->expr = pgf_read_expr(in, pyexpr->pool, err);
+	pyexpr->expr = pgf_read_expr(in, pyexpr->pool, tmp_pool, err);
 	pyexpr->master = NULL;
 	
 	if (!gu_ok(err) || gu_variant_is_null(pyexpr->expr)) {
@@ -3325,7 +3361,7 @@ pgf_readType(PyObject *self, PyObject *args) {
 	GuExn* err = gu_new_exn(tmp_pool);
 
 	pytype->pool = gu_new_pool();
-	pytype->type = pgf_read_type(in, pytype->pool, err);
+	pytype->type = pgf_read_type(in, pytype->pool, tmp_pool, err);
 	pytype->master = NULL;
 
 	if (!gu_ok(err) || pytype->type == NULL) {

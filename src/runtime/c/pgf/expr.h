@@ -168,7 +168,7 @@ PGF_API_DECL PgfExprMeta*
 pgf_expr_unmeta(PgfExpr expr);
 
 PGF_API_DECL PgfExpr
-pgf_read_expr(GuIn* in, GuPool* pool, GuExn* err);
+pgf_read_expr(GuIn* in, GuPool* pool, GuPool* tmp_pool, GuExn* err);
 
 PGF_API_DECL int
 pgf_read_expr_tuple(GuIn* in,
@@ -180,12 +180,12 @@ pgf_read_expr_matrix(GuIn* in, size_t n_exprs,
                      GuPool* pool, GuExn* err);
 
 PGF_API_DECL PgfType*
-pgf_read_type(GuIn* in, GuPool* pool, GuExn* err);
+pgf_read_type(GuIn* in, GuPool* pool, GuPool* tmp_pool, GuExn* err);
 
 PGF_API_DECL bool
 pgf_literal_eq(PgfLiteral lit1, PgfLiteral lit2);
 
-PGF_API_DECL bool
+PGF_API_DECL int
 pgf_expr_eq(PgfExpr e1, PgfExpr e2);
 
 PGF_API_DECL bool
@@ -196,6 +196,18 @@ pgf_literal_hash(GuHash h, PgfLiteral lit);
 
 PGF_API_DECL GuHash
 pgf_expr_hash(GuHash h, PgfExpr e);
+
+PGF_API size_t
+pgf_expr_size(PgfExpr expr);
+
+PGF_API GuSeq*
+pgf_expr_functions(PgfExpr expr, GuPool* pool);
+
+PGF_API PgfExpr
+pgf_expr_substitute(PgfExpr expr, GuSeq* meta_values, GuPool* pool);
+
+PGF_API PgfType*
+pgf_type_substitute(PgfType* type, GuSeq* meta_values, GuPool* pool);
 
 typedef struct PgfPrintContext PgfPrintContext;
 
@@ -223,7 +235,14 @@ pgf_print_type(PgfType *type, PgfPrintContext* ctxt, int prec,
                GuOut* out, GuExn *err);
 
 PGF_API_DECL void
+pgf_print_context(PgfHypos *hypos, PgfPrintContext* ctxt,
+                  GuOut *out, GuExn *err);
+
+PGF_API_DECL void
 pgf_print_expr_tuple(size_t n_exprs, PgfExpr exprs[], PgfPrintContext* ctxt,
                      GuOut* out, GuExn* err);
+
+PGF_API_DECL prob_t
+pgf_compute_tree_probability(PgfPGF *gr, PgfExpr expr);
 
 #endif /* EXPR_H_ */

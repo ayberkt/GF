@@ -57,6 +57,9 @@ pgf_concrete_load(PgfConcr* concr, GuIn* in, GuExn* err);
 PGF_API_DECL void
 pgf_concrete_unload(PgfConcr* concr);
 
+PGF_API_DECL void
+pgf_write(PgfPGF* pgf, const char* fpath, GuExn* err);
+
 PGF_API_DECL GuString
 pgf_abstract_name(PgfPGF*);
 
@@ -78,6 +81,12 @@ pgf_iter_categories(PgfPGF* pgf, GuMapItor* itor, GuExn* err);
 PGF_API_DECL PgfType*
 pgf_start_cat(PgfPGF* pgf, GuPool* pool);
 
+PGF_API_DECL PgfHypos*
+pgf_category_context(PgfPGF *gr, PgfCId catname);
+
+PGF_API_DECL prob_t
+pgf_category_prob(PgfPGF* pgf, PgfCId catname);
+
 PGF_API_DECL void
 pgf_iter_functions(PgfPGF* pgf, GuMapItor* itor, GuExn* err);
 
@@ -88,13 +97,16 @@ pgf_iter_functions_by_cat(PgfPGF* pgf, PgfCId catname,
 PGF_API_DECL PgfType*
 pgf_function_type(PgfPGF* pgf, PgfCId funname);
 
-PGF_API_DECL double
+PGF_API_DECL bool
+pgf_function_is_constructor(PgfPGF* pgf, PgfCId funname);
+
+PGF_API_DECL prob_t
 pgf_function_prob(PgfPGF* pgf, PgfCId funname);
 
 PGF_API_DECL GuString
 pgf_print_name(PgfConcr*, PgfCId id);
 
-PGF_API_DECL bool
+PGF_API_DECL int
 pgf_has_linearization(PgfConcr* concr, PgfCId id);
 
 PGF_API_DECL void
@@ -121,6 +133,13 @@ pgf_compute(PgfPGF* pgf, PgfExpr expr, GuExn* err,
 PGF_API_DECL PgfExprEnum*
 pgf_generate_all(PgfPGF* pgf, PgfType* ty,
                  GuExn* err, GuPool* pool, GuPool* out_pool);
+
+typedef struct {
+	int incomplete;   // equal to !=0 if the sentence is incomplete, 0 otherwise
+	size_t offset;
+	const char*  token_ptr;
+	size_t       token_len;
+} PgfParseError;
 
 PGF_API_DECL PgfExprEnum*
 pgf_parse(PgfConcr* concr, PgfType* typ, GuString sentence,
@@ -193,6 +212,7 @@ pgf_parse_with_oracle(PgfConcr* concr, PgfType* typ,
 typedef struct {
 	PgfToken tok;
 	PgfCId cat;
+	PgfCId fun;
 	prob_t prob;
 } PgfTokenProb;
 

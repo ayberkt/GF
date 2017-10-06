@@ -2,6 +2,7 @@
 #include <pgf/data.h>
 #include <pgf/expr.h>
 #include <pgf/reader.h>
+#include <pgf/writer.h>
 #include <pgf/linearizer.h>
 #include <gu/file.h>
 #include <gu/string.h>
@@ -42,6 +43,28 @@ pgf_read_in(GuIn* in,
 	PgfPGF* pgf = pgf_read_pgf(rdr);
 	pgf_reader_done(rdr, pgf);
 	return pgf;
+}
+
+PGF_API_DECL void
+pgf_write(PgfPGF* pgf, const char* fpath, GuExn* err)
+{
+	FILE* outfile = fopen(fpath, "wb");
+	if (outfile == NULL) {
+		gu_raise_errno(err);
+		return;
+	}
+
+	GuPool* tmp_pool = gu_local_pool();
+
+	// Create an input stream from the input file
+	GuOut* out = gu_file_out(outfile, tmp_pool);
+
+	PgfWriter* wtr = pgf_new_writer(out, tmp_pool, err);
+	pgf_write_pgf(pgf, wtr);
+
+	gu_pool_free(tmp_pool);
+	
+	fclose(outfile);
 }
 
 PGF_API GuString
@@ -101,7 +124,7 @@ pgf_start_cat(PgfPGF* pgf, GuPool* pool)
 			GuPool* tmp_pool = gu_local_pool();
 			GuIn* in = gu_string_in(lstr->val,tmp_pool);
 			GuExn* err = gu_new_exn(tmp_pool);
-			PgfType *type = pgf_read_type(in, pool, err);
+			PgfType *type = pgf_read_type(in, pool, tmp_pool, err);
 			if (!gu_ok(err))
 				break;
 			gu_pool_free(tmp_pool);
@@ -115,6 +138,29 @@ pgf_start_cat(PgfPGF* pgf, GuPool* pool)
 	type->cid     = "S";
 	type->n_exprs = 0;
 	return type;
+}
+
+PGF_API PgfHypos*
+pgf_category_context(PgfPGF *gr, PgfCId catname)
+{
+	PgfAbsCat* abscat =
+		gu_seq_binsearch(gr->abstract.cats, pgf_abscat_order, PgfAbsCat, catname);
+	if (abscat == NULL) {
+		return NULL;
+	}
+
+	return abscat->context;
+}
+
+PGF_API prob_t
+pgf_category_prob(PgfPGF* pgf, PgfCId catname)
+{
+	PgfAbsCat* abscat =
+		gu_seq_binsearch(pgf->abstract.cats, pgf_abscat_order, PgfAbsCat, catname);
+	if (abscat == NULL)
+		return INFINITY;
+
+	return abscat->prob;
 }
 
 PGF_API GuString
@@ -150,7 +196,7 @@ pgf_iter_functions(PgfPGF* pgf, GuMapItor* itor, GuExn* err)
 }
 
 PGF_API void
-pgf_iter_functions_by_cat(PgfPGF* pgf, PgfCId catname, 
+pgf_iter_functions_by_cat(PgfPGF* pgf, PgfCId catname,
                           GuMapItor* itor, GuExn* err) 
 {
 	size_t n_funs = gu_seq_length(pgf->abstract.funs);
@@ -176,7 +222,17 @@ pgf_function_type(PgfPGF* pgf, PgfCId funname)
 	return absfun->type;
 }
 
-PGF_API double
+PGF_API_DECL bool
+pgf_function_is_constructor(PgfPGF* pgf, PgfCId funname)
+{
+	PgfAbsFun* absfun =
+		gu_seq_binsearch(pgf->abstract.funs, pgf_absfun_order, PgfAbsFun, funname);
+	if (absfun == NULL)
+		return false;
+	return (absfun->defns == NULL);
+}
+
+PGF_API prob_t
 pgf_function_prob(PgfPGF* pgf, PgfCId funname) 
 {
 	PgfAbsFun* absfun =
@@ -195,7 +251,7 @@ pgf_print_name(PgfConcr* concr, PgfCId id)
 	return name;
 }
 
-PGF_API bool
+PGF_API int
 pgf_has_linearization(PgfConcr* concr, PgfCId id)
 {
 	PgfCncOverloadMap* overl_table =

@@ -14,7 +14,11 @@ resource ResTur = ParamX ** open Prelude, Predef, HarmonyTur in {
 
   oper
     Agr = {n : Number ; p : Person} ;
-    Noun = {s : Number => Case => Str; gen : Number => Agr => Str; harmony : Harmony} ;
+    Noun = {
+      s   : Number => Case => Str ;
+      gen : Number => Agr => Str  ;
+      harmony : Harmony
+    } ;
     Pron = {s : Case => Str; a : Agr} ;
     Conj = {s1 : Str ; s2 : Str ; ct : ConjType} ;
 
@@ -26,15 +30,16 @@ resource ResTur = ParamX ** open Prelude, Predef, HarmonyTur in {
 
     -- For $Verb$.
 
-    param
-      VForm =
-        VProg      Agr
-      | VPast      Agr
-      | VFuture    Agr
-      | VAorist    Agr
-      | VImperative
-      | VInfinitive
-      ;
+  param
+    VForm =
+       VProg      Agr
+     | VPast      Agr
+     | VFuture    Agr
+     | VAorist    Agr
+     | VImperative
+     | VInfinitive
+     | Gerund Number Case
+     ;
 
     param ConjType = Infix | Mixfix ;
 
@@ -90,4 +95,14 @@ resource ResTur = ParamX ** open Prelude, Predef, HarmonyTur in {
       mkConj : Str -> Conj         = \s      -> {s1 = s  ; s2 = [] ; ct = Infix} ;
       mkConj : Str -> Str -> Conj  = \s1, s2 -> {s1 = s1 ; s2 = s2 ; ct = Mixfix} ;
     } ;
+
+    attachMe : Verb -> {s : Str} =
+      \v ->
+        let
+          s : Str = v.s ! VImperative
+        in
+          case s of {
+            (_ + #vowel + _ )* + (_ + #frontVowel + _) => ss (s ++ "me") ;
+            (_ + #vowel + _)*  + (_ + #backVowel  + _) => ss (s ++ "ma")
+          } ;
 }

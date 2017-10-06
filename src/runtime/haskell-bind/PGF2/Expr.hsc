@@ -5,6 +5,7 @@ module PGF2.Expr where
 import System.IO.Unsafe(unsafePerformIO)
 import Foreign hiding (unsafePerformIO)
 import Foreign.C
+import Data.IORef
 import PGF2.FFI
 
 -- | An data type that represents
@@ -34,6 +35,13 @@ data Expr = Expr {expr :: PgfExpr, touchExpr :: Touch}
 instance Show Expr where
   show = showExpr []
 
+instance Eq Expr where
+  (Expr e1 e1_touch) == (Expr e2 e2_touch) = 
+    unsafePerformIO $ do
+      res <- pgf_expr_eq e1 e2
+      e1_touch >> e2_touch
+      return (res /= 0)
+
 -- | Constructs an expression by lambda abstraction
 mkAbs :: BindType -> CId -> Expr -> Expr
 mkAbs bind_type var (Expr body bodyTouch) =
@@ -44,7 +52,7 @@ mkAbs bind_type var (Expr body bodyTouch) =
       exprFPl <- newForeignPtr gu_pool_finalizer exprPl
       return (Expr c_expr (bodyTouch >> touchForeignPtr exprFPl))
   where
-    cbind_type = 
+    cbind_type =
       case bind_type of
         Explicit -> (#const PGF_BIND_TYPE_EXPLICIT)
         Implicit -> (#const PGF_BIND_TYPE_IMPLICIT)
@@ -176,6 +184,9 @@ unMeta (Expr expr touch) =
                 touch
                 return (Just (fromIntegral (id :: CInt)))
 
+-- | this functions is only for backward compatibility with the old Haskell runtime
+mkCId x = x
+
 -- | parses a 'String' as an expression
 readExpr :: String -> Maybe Expr
 readExpr str =
@@ -185,13 +196,55 @@ readExpr str =
          do c_str <- newUtf8CString str tmpPl
             guin <- gu_string_in c_str tmpPl
             exn <- gu_new_exn tmpPl
-            c_expr <- pgf_read_expr guin exprPl exn
+            c_expr <- pgf_read_expr guin exprPl tmpPl exn
             status <- gu_exn_is_raised exn
             if (not status && c_expr /= nullPtr)
               then do exprFPl <- newForeignPtr gu_pool_finalizer exprPl
                       return $ Just (Expr c_expr (touchForeignPtr exprFPl))
               else do gu_pool_free exprPl
                       return Nothing
+
+pExpr :: ReadS Expr
+pExpr str =
+  unsafePerformIO $
+    do exprPl <- gu_new_pool
+       withGuPool $ \tmpPl ->
+         do ref <- newIORef (str,str,str)
+            exn <- gu_new_exn tmpPl
+            c_fetch_char <- wrapParserGetc (fetch_char ref)
+            c_parser <- pgf_new_parser nullPtr c_fetch_char exprPl tmpPl exn
+            c_expr <- pgf_expr_parser_expr c_parser 1
+            status <- gu_exn_is_raised exn
+            if (not status && c_expr /= nullPtr)
+              then do exprFPl <- newForeignPtr gu_pool_finalizer exprPl
+                      (str,_,_) <- readIORef ref
+                      return [(Expr c_expr (touchForeignPtr exprFPl),str)]
+              else do gu_pool_free exprPl
+                      return []
+  where
+    fetch_char :: IORef (String,String,String) -> Ptr () -> (#type bool) -> Ptr GuExn -> IO (#type GuUCS)
+    fetch_char ref _ mark exn = do
+      (str1,str2,str3) <- readIORef ref
+      let str1' = if mark /= 0
+                    then str2
+                    else str1
+      case str3 of
+        []     -> do writeIORef ref (str1',str3,[])
+                     gu_exn_raise exn gu_exn_type_GuEOF
+                     return (-1)
+        (c:cs) -> do writeIORef ref (str1',str3,cs)
+                     return ((fromIntegral . fromEnum) c)
+
+foreign import ccall "pgf/expr.h pgf_new_parser"
+  pgf_new_parser :: Ptr () -> (FunPtr ParserGetc) -> Ptr GuPool -> Ptr GuPool -> Ptr GuExn -> IO (Ptr PgfExprParser)
+
+foreign import ccall "pgf/expr.h pgf_expr_parser_expr"
+  pgf_expr_parser_expr :: Ptr PgfExprParser -> (#type bool) -> IO PgfExpr
+
+type ParserGetc = Ptr () -> (#type bool) -> Ptr GuExn -> IO (#type GuUCS)
+
+foreign import ccall "wrapper"
+  wrapParserGetc :: ParserGetc -> IO (FunPtr ParserGetc)
 
 -- | renders an expression as a 'String'. The list
 -- of identifiers is the list of all free variables
