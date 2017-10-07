@@ -23,7 +23,7 @@ concrete PhraseTur of Phrase = CatTur ** open Prelude, ResTur in {
     UttAdv adv = adv ;
 
     NoPConj = {s = []} ;
-    PConjConj conj = {s = conj.s} ;
+    PConjConj conj = {s = conj.s2} ;
 
     NoVoc = {s = []} ;
     VocNP np = {s = np.s ! Nom} ;
