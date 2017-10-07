@@ -100,29 +100,25 @@ concrete StructuralTur of Structural = CatTur **
     -- Linearizing (PredVP (UsePron he_Pron) (UseV sing_V)) will yield
     -- nobody sings regardless. The double negation will be implemented
     -- when `UseCl` is implemented eventually.
-    nobody_NP     = mkNP (mkN "hiç kimse") Sg P3 ;
+    nobody_NP      = mkNP (mkN "hiç kimse") Sg P3 ;
 
-    many_Det = mkDet "birçok" Sg NoGen ;
+    many_Det       = mkDet "birçok" Sg NoGen ;
+    all_Predet     = {s = "her"} ;
+    almost_AdA     = {s = "neredeyse"} ;
+    almost_AdN     = {s = "neredeyse"} ;
 
-    all_Predet = {s = "her"} ;
+    by8agent_Prep  = mkPrep "tarafından" Gen ;
+    by8means_Prep  = mkPrep "tarafından" Gen ;
 
-    almost_AdA = {s = "neredeyse"} ;
+    although_Subj  = {s = "buna rağmen"} ;
 
-    almost_AdN = {s = "neredeyse"} ;
+    because_Subj   = {s = "çünkü"} ;
 
-    by8agent_Prep = mkPrep "tarafından" Gen ;
-
-    by8means_Prep = mkPrep "tarafından" Gen ;
-
-    although_Subj = {s = "buna rağmen"} ;
-
-    because_Subj = {s = "çünkü"} ;
-
-    here_Adv = {s = "burada"} ;
+    here_Adv       = {s = "burada"} ;
 
     everywhere_Adv = {s = "her yerde"} ;
 
-    if_Subj = {s = "eğer"} ;
+    if_Subj        = {s = "eğer"} ;
 
     both7and_DConj  = mkConj "hem" "hem de" ;
     either7or_DConj = mkConj "ya"  "ya da"  ;
