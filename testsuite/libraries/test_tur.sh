@@ -19,4 +19,4 @@ while true; do
   fi;
   (( COUNT+=1 ));
 done 3<tur.out 4<tur.expected 5<tur.tests
-rm tur_out.txt
+rm tur.out
