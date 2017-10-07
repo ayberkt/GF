@@ -103,6 +103,7 @@ concrete StructuralTur of Structural = CatTur **
     nobody_NP      = mkNP (mkN "hiç kimse") Sg P3 ;
 
     many_Det       = mkDet "birçok" Sg NoGen ;
+    every_Det      = mkDet "her"    Sg NoGen ;
     all_Predet     = {s = "her"} ;
     almost_AdA     = {s = "neredeyse"} ;
     almost_AdN     = {s = "neredeyse"} ;
