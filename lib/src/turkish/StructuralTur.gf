@@ -101,6 +101,10 @@ concrete StructuralTur of Structural = CatTur **
 
     almost_AdN = {s = "neredeyse"} ;
 
+    by8agent_Prep = mkPrep "tarafından" Gen ;
+
+    by8means_Prep = mkPrep "tarafından" Gen ;
+
     although_Subj = {s = "buna rağmen"} ;
 
     because_Subj = {s = "çünkü"} ;
