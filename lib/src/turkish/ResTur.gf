@@ -91,6 +91,20 @@ resource ResTur = ParamX ** open Prelude, Predef, HarmonyTur in {
     } ;
 
     mkConj = overload {
+      mkConj : Str -> {s : Str ; s1 : Str ; s2 : Str ; ct : ConjType} =
+        \s -> {
+          s  = s  ;
+          s1 = s  ;
+          s2 = [] ;
+          ct = Infix
+        } ;
+      mkConj : Str -> Str -> {s : Str ; s1 : Str ; s2 : Str ; ct : ConjType} =
+        \s1, s2 -> {
+          s  = s1 ++ s2 ;
+          s1 = s1 ;
+          s2 = s2 ;
+          ct = Mixfix
+        } ;
     } ;
 
     attachMe : Verb -> {s : Str} =
