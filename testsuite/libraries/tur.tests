@@ -2,3 +2,4 @@ PhrUtt NoPConj (UttAdv (PrepNP by8agent_Prep (UsePron it_Pron))) NoVoc
 PhrUtt NoPConj (UttAdv (PrepNP by8agent_Prep (UsePron she_Pron))) NoVoc
 PhrUtt NoPConj (UttAdv (PrepNP by8means_Prep (UsePron he_Pron))) NoVoc
 PhrUtt NoPConj (UttAdv (PrepNP by8means_Prep (UsePron it_Pron))) NoVoc
+(PredVP everybody_NP (UseV sing_V))
