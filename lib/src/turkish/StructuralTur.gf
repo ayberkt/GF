@@ -124,7 +124,7 @@ concrete StructuralTur of Structural = CatTur **
 
     if_Subj = {s = "eğer"} ;
 
-    both7and_DConj = mkConj "hem" "hem de" ;
+    both7and_DConj  = mkConj "hem" "hem de" ;
     either7or_DConj = mkConj "ya"  "ya da"  ;
 
 }
