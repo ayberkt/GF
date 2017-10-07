@@ -89,9 +89,18 @@ concrete StructuralTur of Structural = CatTur **
 
     but_PConj = ss "ama" ;
 
-    everybody_NP  = mkNP (mkN "herkes") Sg P3 ;
+    everybody_NP  = mkNP (mkN "herkes")    Sg P3 ;
+    everything_NP = mkNP (mkN "herşey")    Sg P3 ;
 
-    everything_NP = mkNP (mkN "herşey") Sg P3 ;
+    -- The sentence (PredVP (UsePron he_Pron) (UseV sing_V)) would be
+    -- linearized as
+    --   > nobody sings
+    -- in English, whereas in Turkish it would literally translate to
+    --   > nobody doesn't sing
+    -- Linearizing (PredVP (UsePron he_Pron) (UseV sing_V)) will yield
+    -- nobody sings regardless. The double negation will be implemented
+    -- when `UseCl` is implemented eventually.
+    nobody_NP     = mkNP (mkN "hiç kimse") Sg P3 ;
 
     many_Det = mkDet "birçok" Sg NoGen ;
 
