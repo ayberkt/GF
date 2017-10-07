@@ -20,7 +20,6 @@ resource ResTur = ParamX ** open Prelude, Predef, HarmonyTur in {
       harmony : Harmony
     } ;
     Pron = {s : Case => Str; a : Agr} ;
-    Conj = {s1 : Str ; s2 : Str ; ct : ConjType} ;
 
     agrP3 : Number -> Agr ;
     agrP3 n = {n = n; p = P3} ;
@@ -87,13 +86,11 @@ resource ResTur = ParamX ** open Prelude, Predef, HarmonyTur in {
       \s, n, ug -> {s = s; n = n; useGen = ug} ;
 
     mkConj : overload {
-      mkConj : Str -> Conj ;
-      mkConj : Str -> Str -> Conj ;
+      mkConj : Str -> {s : Str ; s1 : Str ; s2 : Str ; ct : ConjType} ;
+      mkConj : Str -> Str -> {s : Str ; s1 : Str ; s2 : Str ; ct : ConjType} ;
     } ;
 
     mkConj = overload {
-      mkConj : Str -> Conj         = \s      -> {s1 = s  ; s2 = [] ; ct = Infix} ;
-      mkConj : Str -> Str -> Conj  = \s1, s2 -> {s1 = s1 ; s2 = s2 ; ct = Mixfix} ;
     } ;
 
     attachMe : Verb -> {s : Str} =
