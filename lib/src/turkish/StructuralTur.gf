@@ -133,8 +133,9 @@ concrete StructuralTur of Structural = CatTur **
     -- TODO: there is really no have_V2 in Turkish.
     -- have_V2
 
-    -- TODO: here7from_Adv
     -- This is really just `here_Adv` in ablative form.
     here7from_Adv = {s = "buradan"} ;
-    -- TODO: here7to_Adv
+
+    -- This is really just `here_Adv` in dative form.
+    here7to_Adv = {s = "buraya"} ;
 }
