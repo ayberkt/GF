@@ -115,9 +115,9 @@ concrete StructuralTur of Structural = CatTur **
 
     because_Subj   = {s = "çünkü"} ;
 
-    here_Adv       = {s = "burada"} ;
+    here_Adv       = mkAdv "burada" ;
 
-    everywhere_Adv = {s = "her yerde"} ;
+    everywhere_Adv = mkAdv "her yerde" ;
 
     if_Subj        = {s = "eğer"} ;
 
@@ -134,10 +134,10 @@ concrete StructuralTur of Structural = CatTur **
     -- have_V2
 
     -- This is really just `here_Adv` in ablative form.
-    here7from_Adv = {s = "buradan"} ;
+    here7from_Adv = mkAdv "buradan" ;
 
     -- This is really just `here_Adv` in dative form.
-    here7to_Adv = {s = "buraya"} ;
+    here7to_Adv = mkAdv "buraya" ;
 
     -- TODO: how8many_IDet
     -- TODO: how8much_IAdv
