@@ -126,8 +126,9 @@ concrete StructuralTur of Structural = CatTur **
 
     few_Det = mkDet "birkaç" Sg NoGen ;
 
-    for_Prep = mkPrep "için" Nom;
-    -- TODO: from_Prep
+    for_Prep = mkPrep "için" Nom ;
+
+    from_Prep = mkPrep "" Ablat ;
     -- TODO: have_V2
     -- TODO: here7from_Adv
     -- TODO: here7to_Adv
