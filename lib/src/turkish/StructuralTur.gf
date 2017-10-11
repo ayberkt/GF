@@ -124,8 +124,8 @@ concrete StructuralTur of Structural = CatTur **
     both7and_DConj  = mkConj "hem" "hem de" ;
     either7or_DConj = mkConj "ya"  "ya da"  ;
 
-    -- TODO: except_Prep
-    -- TODO: few_Det
+    few_Det = mkDet "birkaç" Sg NoGen ;
+
     -- TODO: for_Prep
     -- TODO: from_Prep
     -- TODO: have_V2
