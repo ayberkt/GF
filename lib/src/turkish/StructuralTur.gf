@@ -138,4 +138,17 @@ concrete StructuralTur of Structural = CatTur **
 
     -- This is really just `here_Adv` in dative form.
     here7to_Adv = {s = "buraya"} ;
+
+    -- TODO: how8many_IDet
+    -- TODO: how8much_IAdv
+    -- TODO: how_IAdv
+    -- TODO: if_then_Conj
+    -- TODO: in8front_Prep
+    -- TODO: language_title_Utt
+    -- TODO: less_CAdv
+    -- TODO: many_Det
+    -- TODO: more_CAdv
+    -- TODO: most_Predet
+    -- TODO: much_Det
+
 }
