@@ -6,10 +6,11 @@ while true; do
   read -r f1 <&3 || break
   read -r f2 <&4 || break
   read -r f3 <&5 || break
+  # Alignment should be done for this.
   if [[ $f1 == $f2 ]]; then
-    printf "$COUNT  | \"$f1\" ----- \e[1m\e[32m SUCCESS \e[0m\n"
+    printf "$COUNT  | \"%s\" ..........  \e[1m\e[32m %s \e[0m\n" "$f1" "SUCCESS"
   else
-    printf "$COUNT  | \"$f1\" ----- \e[1m\e[31m FAILURE \e[0m\n"
+    printf "$COUNT  | \"%s\" ..........  \e[1m\e[31m %s \e[0m\n" "$f1" "FAILURE"
     printf "\n----------------------------------------\n"
     printf "Linearization of\n"
     printf "   > $f3\n"
