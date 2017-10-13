@@ -267,7 +267,7 @@ resource ParadigmsTur = open
         } ;
 
     -- Implementation of noun paradigms.
-    mkNoun sn sa sd sg sl sabl sgabPos sgabNeg sgs pln har =
+    mkNoun sn sa sd sg sl sabl sgabPos sgabNeg cnd sgs pln har =
       let
         plHar = getHarmony pln ;
       in
@@ -282,6 +282,7 @@ resource ParadigmsTur = open
               Ablat     => sabl ;
               Abess Pos => sgabPos ;
               Abess Neg => sgabNeg
+              Cond      => cnd
             } ;
             Pl => table {
               Abess Pos => addSuffix sgabPos plHar plSuffix ;
@@ -309,17 +310,17 @@ resource ParadigmsTur = open
           har = mkHar ht (SCon (getSoftness sn)) ;
           irHar = mkHar ht (getHarConP sg) ;
       in
-      mkNoun sn
-            (addSuffix sg irHar accSuffix)
-      (addSuffix sg irHar datSuffix)
-            (addSuffix sg har genSuffix)
-            (addSuffix sn har locSuffix)
-      (addSuffix sn har ablatSuffix)
-      (addSuffix sn har abessPosSuffix)
-      (addSuffix sn har abessNegSuffix)
-      sg
-            pln
-            har ;
+        mkNoun
+          sn
+          (addSuffix sg irHar accSuffix)
+          (addSuffix sg irHar datSuffix)
+          (addSuffix sg har genSuffix)
+          (addSuffix sn har locSuffix)
+          (addSuffix sn har ablatSuffix)
+          (addSuffix sn har abessPosSuffix)
+          sg
+          pln
+          har ;
 
     regN sn =
       let har = getHarmony sn ;
