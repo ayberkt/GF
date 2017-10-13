@@ -156,26 +156,24 @@ resource SuffixTur = open Prelude, Predef, ResTur, HarmonyTur in {
       \baseTable,har,suf -> (baseTable ! suf.stemT) + suf.st ! har.con ! har.vow ;
 
 
-    regSuffix larC larV =
-	{
-	  st = regH4Suffix larC larV ;
-	  stemT = getBeginType larC ;
-	} ;
+    regSuffix larC larV = {
+      st = regH4Suffix larC larV ;
+      stemT = getBeginType larC ;
+	  } ;
 
-    regSuffix2 larC larV =
-	{
-	  st = regH4Suffix2 larC larV ;
-	  stemT = getBeginType larC ;
-	} ;
+    regSuffix2 larC larV = {
+	    st = regH4Suffix2 larC larV ;
+	    stemT = getBeginType larC ;
+	  } ;
 
 
-    regSuffix21 larC larV =
-          {
-	    st = table {
-		  SCon z => (regH4Suffix2 larC larV) ! SCon z ;
-		  SVow   => (regH4Suffix larC larV)  ! SVow
-		 } ;
-            stemT = getBeginType larC ;
+    regSuffix21 larC larV = {
+	    st =
+        table {
+		      SCon z => (regH4Suffix2 larC larV) ! SCon z ;
+		      SVow   => (regH4Suffix larC larV)  ! SVow
+		    } ;
+      stemT = getBeginType larC ;
 	  } ;
 
 --  Constructs suffix table for a one syllable suffix
