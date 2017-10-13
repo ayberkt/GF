@@ -150,9 +150,7 @@ concrete StructuralTur of Structural = CatTur **
     if_then_Conj = mkConj "" "" ;
 
     -- TODO: in8front_Prep
-    -- TODO: language_title_Utt
-    -- TODO: less_CAdv
-    -- TODO: many_Det
+    in8front_Prep = mkPrep "önünde" Gen ;
     -- TODO: more_CAdv
     -- TODO: most_Predet
     -- TODO: much_Det
