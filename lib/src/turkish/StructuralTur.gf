@@ -157,6 +157,6 @@ concrete StructuralTur of Structural = CatTur **
 
     most_Predet = {s = "en çok"} ;
 
-    much_Det = {s = "çok"} ;
+    much_Det = mkDet "çok" Pl NoGen ;
 
 }
