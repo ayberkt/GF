@@ -54,21 +54,20 @@ resource SuffixTur = open Prelude, Predef, ResTur, HarmonyTur in {
 --  Plural Suffix
     plSuffix        : Suffix = regSuffix "ler" "ler" ;
 
---  Case Suffixes
-    accSuffix       : Suffix = regSuffix "i" "yi" ;
-    datSuffix       : Suffix = regSuffix "e" "ye" ;
-    genSuffix       : Suffix = regSuffix "in" "nin" ;
-    locSuffix       : Suffix = regSuffix "de" "de" ;
-    ablatSuffix     : Suffix = regSuffix "den" "den" ;
-    abessPosSuffix  : Suffix = regSuffix "li" "li" ;
-    abessNegSuffix  : Suffix = regSuffix "siz" "siz" ;
---  following 4 suffixes has other forms used after genSgP3Suffix
-    accSuffixN      : Suffix = regSuffix "i" "ni" ;
-    datSuffixN      : Suffix = regSuffix "e" "ne" ;
-    locSuffixN      : Suffix = regSuffix "de" "nde" ;
-    ablatSuffixN    : Suffix = regSuffix "den" "nden" ;
+    -- Case Suffixes
+    accSuffix       : Suffix = regSuffix   "i"   "yi"   ;
+    datSuffix       : Suffix = regSuffix   "e"   "ye"   ;
+    genSuffix       : Suffix = regSuffix   "in"  "nin"  ;
+    locSuffix       : Suffix = regSuffix   "de"  "de"   ;
+    ablatSuffix     : Suffix = regSuffix   "den" "den"  ;
+    abessPosSuffix  : Suffix = regSuffix   "li"  "li"   ;
+    abessNegSuffix  : Suffix = regSuffix   "siz" "siz"  ;
 
---  Genitive Suffixes
+    --  following 4 suffixes has other forms used after genSgP3Suffix
+    accSuffixN      : Suffix = regSuffix   "i"   "ni"   ;
+    datSuffixN      : Suffix = regSuffix   "e"   "ne"   ;
+    locSuffixN      : Suffix = regSuffix   "de"  "nde"  ;
+    ablatSuffixN    : Suffix = regSuffix   "den" "nden" ;
     genSgP1Suffix   : Suffix = regSuffix "im" "m" ;
     genSgP2Suffix   : Suffix = regSuffix "in" "n" ;
     genSgP3Suffix   : Suffix = regSuffix "i" "si" ;
