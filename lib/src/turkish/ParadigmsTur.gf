@@ -534,7 +534,8 @@ resource ParadigmsTur = open
                 Hard => base
         } ;
 
-    -- following two functions are to help deciding har type of nouns like vakit, hasut
+    -- following two functions are to help deciding har type of nouns like
+    --  vakit, hasut.
     getComplexHarmony : Str -> Str -> HarVowP =
       \sn,sg -> case <(getHarVowP sn), (getHarVowP sg)> of {
                   <(I_Har | U_Har)  , Ih_Har> => I_Har  ;
