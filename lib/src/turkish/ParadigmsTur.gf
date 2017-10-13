@@ -266,39 +266,40 @@ resource ParadigmsTur = open
             }
         } ;
 
-    -- Implementation of noun paradigms
+    -- Implementation of noun paradigms.
     mkNoun sn sa sd sg sl sabl sgabPos sgabNeg sgs pln har =
-        let plHar = getHarmony pln ;
-        in
-      lin N {
-        s   = table {
-                Sg => table {
-            Nom     => sn ;
-            Acc     => sa ;
-            Dat     => sd ;
-            Gen     => sg ;
-            Loc     => sl ;
-            Ablat   => sabl ;
-            Abess Pos => sgabPos ;
-                        Abess Neg => sgabNeg
+      let
+        plHar = getHarmony pln ;
+      in
+        lin N {
+          s = table {
+            Sg => table {
+              Nom       => sn ;
+              Acc       => sa ;
+              Dat       => sd ;
+              Gen       => sg ;
+              Loc       => sl ;
+              Ablat     => sabl ;
+              Abess Pos => sgabPos ;
+              Abess Neg => sgabNeg
+            } ;
+            Pl => table {
+              Abess Pos => addSuffix sgabPos plHar plSuffix ;
+              Abess Neg => addSuffix sgabNeg plHar plSuffix ;
+              c         => addSuffix pln plHar (caseSuffixes ! c)
+            }
           } ;
-                Pl => table {
-            Abess Pos => addSuffix sgabPos plHar plSuffix;
-            Abess Neg => addSuffix sgabNeg plHar plSuffix;
-            c => addSuffix pln plHar (caseSuffixes ! c)
-          }
-                  } ;
-        gen = table {
-                Sg => table {
-      -- Genitive suffix for P3 is always -ları, always selecting plural form of
-      -- base and harmony is a trick to implement this
-            {n=Pl; p=P3} => addSuffix pln plHar genPlP3Suffix ;
-            s            => addSuffix sgs har (genSuffixes ! s)
+          gen = table {
+            Sg => table {
+              -- Genitive suffix for P3 is always -ları, always selecting plural
+              -- form of base and harmony is a trick to implement this.
+              {n=Pl; p=P3} => addSuffix pln plHar genPlP3Suffix ;
+              s            => addSuffix sgs har (genSuffixes ! s)
+            } ;
+            Pl => \\s => addSuffix pln plHar (genSuffixes ! s)
+          } ;
+          harmony = har
         } ;
-                Pl => \\s => addSuffix pln plHar (genSuffixes ! s)
-          } ;
-        harmony = har
-      } ;
 
     irregN_h sn sg har = irregN har sn sg ;
 
