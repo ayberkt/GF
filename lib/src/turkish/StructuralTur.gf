@@ -145,7 +145,10 @@ concrete StructuralTur of Structural = CatTur **
 
     how_IAdv = {s = "nasıl"} ;
 
-    -- TODO: if_then_Conj
+    -- Conditionals in Turkish are handled through inflections.
+    -- I will decide what to do with this later.
+    if_then_Conj = mkConj "" "" ;
+
     -- TODO: in8front_Prep
     -- TODO: language_title_Utt
     -- TODO: less_CAdv
