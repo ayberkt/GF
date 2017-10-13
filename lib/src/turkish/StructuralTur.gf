@@ -154,7 +154,9 @@ concrete StructuralTur of Structural = CatTur **
 
     language_title_Utt = {s = "Türkçe"} ;
     -- TODO: more_CAdv
-    -- TODO: most_Predet
+
+    most_Predet = {s = "en çok"} ;
+
     -- TODO: much_Det
 
 }
