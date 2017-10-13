@@ -51,7 +51,7 @@ resource SuffixTur = open Prelude, Predef, ResTur, HarmonyTur in {
 --  This suffix is required for some suffix tables (e.g. nominative case and 3rd Sg person verbal suffix)
     empSuffix       : Suffix = regSuffix "" "" ;
 
---  Plural Suffix
+    -- Plural Suffix
     plSuffix        : Suffix = regSuffix "ler" "ler" ;
 
     -- Case Suffixes
@@ -70,36 +70,44 @@ resource SuffixTur = open Prelude, Predef, ResTur, HarmonyTur in {
     locSuffixN      : Suffix = regSuffix   "de"  "nde"  ;
     ablatSuffixN    : Suffix = regSuffix   "den" "nden" ;
     condSuffixN     : Suffix = regSuffix   "se"  "yse"  ;
+
+    -- Genitive Suffixes
     genSgP1Suffix   : Suffix = regSuffix "im" "m" ;
     genSgP2Suffix   : Suffix = regSuffix "in" "n" ;
     genSgP3Suffix   : Suffix = regSuffix "i" "si" ;
     genPlP1Suffix   : Suffix = regSuffix21 "imiz" "miz" ;
     genPlP2Suffix   : Suffix = regSuffix21 "iniz" "niz" ;
---  3rd plural person genitive suffix is actually "-ları" but can be represented as plSuffix + current form,
---  see the comment at makeNoun operation in ParadigmsTur.gf
+    -- 3rd plural person genitive suffix is actually "-ları" but can be
+    -- represented as plSuffix + current form, see the comment at makeNoun
+    -- operation in ParadigmsTur.gf
     genPlP3Suffix   : Suffix = regSuffix "i" "i" ;
 
---  Tense Suffixes
+    -- Tense Suffixes
     pastSuffix      : Suffix = regSuffix "di" "di" ;
     inferentSuffix  : Suffix = regSuffix "miş" "miş" ;
---  Vowel "o" does not obey harmony rules so assume that "iyor" is a one syllable word (see oper oneSylParser)
+
+    -- Vowel "o" does not obey harmony rules so assume that "iyor" is a one
+    -- syllable word (see oper oneSylParser)
     presentSuffix   : Suffix = regSuffix "iyor" "iyor" ;
     aoristIrSuffix  : Suffix = regSuffix "ir" "r" ;
     aoristErSuffix  : Suffix = regSuffix "er" "r" ;
     futureSuffix    : Suffix = regSuffix2 "ecek" "yecek" ;
     softFutureSuffix    : Suffix = regSuffix2 "eceğ" "yeceğ" ;
---  Person Suffixes for Verbs
+    -- Person Suffixes for Verbs
 
     p1SgVerbalSuffix : Suffix = regSuffix "im" "m" ;
     p2SgVerbalSuffix : Suffix = regSuffix "sin" "n" ;
---  No suffix is used for the 3rd singular person  (i.e empty suffix will be used in suffix tables in ResTur.gf)
+
+    --  No suffix is used for the 3rd singular person
+    -- (i.e empty suffix will be used in suffix tables in ResTur.gf)
     p1PlVerbalSuffix : Suffix = regSuffix "iz" "k" ;
     p2PlVerbalSuffix : Suffix = regSuffix21 "siniz" "niz" ;
     p3PlVerbalSuffix : Suffix = regSuffix "ler" "ler" ;
 
---  Ordinal suffix for numbers
+    -- Ordinal suffix for numbers
     ordNumSuffix     : Suffix = regSuffix21 "inci" "nci" ;
---  Suffix for deriving adverb from a adjective
+
+    -- Suffix for deriving adverb from a adjective
     adjAdvSuffix     : Suffix = regSuffix "ce" "ce" ;
 
     caseSuffixes : Case => Suffix =
