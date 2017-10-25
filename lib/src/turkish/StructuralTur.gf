@@ -159,4 +159,6 @@ concrete StructuralTur of Structural = CatTur **
 
     much_Det = mkDet "çok" Pl NoGen ;
 
+    without_Prep = mkPrep "" (Abess Neg) ;
+
 }
