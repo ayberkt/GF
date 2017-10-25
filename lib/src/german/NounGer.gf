@@ -192,11 +192,10 @@ concrete NounGer of Noun = CatGer ** open ResGer, MorphoGer, Prelude in {
         } ;
 
  
-    RelCN cn rs = cn ** {rc = \\n => (cn.rc ! n ++ embedInCommas (rs.s ! RGenNum (gennum cn.g n)))} ;
-    ---- another layer of embedInCommas needed if there is a non-empty rc
-    
+    RelCN cn rs = cn ** {rc = \\n => embedInCommas (rs.s ! RGenNum (gennum cn.g n))} ;
+
     RelNP np rs = np ** {
-      rc = (np.rc ++ embedInCommas (rs.s ! RGenNum (gennum (genderAgr np.a) (numberAgr np.a)))) ;
+      rc = embedInCommas (rs.s ! RGenNum (gennum (genderAgr np.a) (numberAgr np.a))) ;
       isPron = False } ;
 
     SentCN cn s = cn ** {ext = embedInCommas s.s} ;

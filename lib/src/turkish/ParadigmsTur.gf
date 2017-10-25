@@ -266,41 +266,39 @@ resource ParadigmsTur = open
             }
         } ;
 
-    -- Implementation of noun paradigms.
-    mkNoun sn sa sd sg sl sabl sgabPos sgabNeg cnd sgs pln har =
-      let
-        plHar = getHarmony pln ;
-      in
-        lin N {
-          s = table {
-            Sg => table {
-              Nom       => sn ;
-              Acc       => sa ;
-              Dat       => sd ;
-              Gen       => sg ;
-              Loc       => sl ;
-              Ablat     => sabl ;
-              Abess Pos => sgabPos ;
-              Abess Neg => sgabNeg
-              Cond      => cnd
-            } ;
-            Pl => table {
-              Abess Pos => addSuffix sgabPos plHar plSuffix ;
-              Abess Neg => addSuffix sgabNeg plHar plSuffix ;
-              c         => addSuffix pln plHar (caseSuffixes ! c)
-            }
+    -- Implementation of noun paradigms
+    mkNoun sn sa sd sg sl sabl sgabPos sgabNeg sgs pln har =
+        let plHar = getHarmony pln ;
+        in
+      lin N {
+        s   = table {
+                Sg => table {
+            Nom     => sn ;
+            Acc     => sa ;
+            Dat     => sd ;
+            Gen     => sg ;
+            Loc     => sl ;
+            Ablat   => sabl ;
+            Abess Pos => sgabPos ;
+                        Abess Neg => sgabNeg
           } ;
-          gen = table {
-            Sg => table {
-              -- Genitive suffix for P3 is always -ları, always selecting plural
-              -- form of base and harmony is a trick to implement this.
-              {n=Pl; p=P3} => addSuffix pln plHar genPlP3Suffix ;
-              s            => addSuffix sgs har (genSuffixes ! s)
-            } ;
-            Pl => \\s => addSuffix pln plHar (genSuffixes ! s)
-          } ;
-          harmony = har
+                Pl => table {
+            Abess Pos => addSuffix sgabPos plHar plSuffix;
+            Abess Neg => addSuffix sgabNeg plHar plSuffix;
+            c => addSuffix pln plHar (caseSuffixes ! c)
+          }
+                  } ;
+        gen = table {
+                Sg => table {
+      -- Genitive suffix for P3 is always -ları, always selecting plural form of
+      -- base and harmony is a trick to implement this
+            {n=Pl; p=P3} => addSuffix pln plHar genPlP3Suffix ;
+            s            => addSuffix sgs har (genSuffixes ! s)
         } ;
+                Pl => \\s => addSuffix pln plHar (genSuffixes ! s)
+          } ;
+        harmony = har
+      } ;
 
     irregN_h sn sg har = irregN har sn sg ;
 
@@ -310,17 +308,17 @@ resource ParadigmsTur = open
           har = mkHar ht (SCon (getSoftness sn)) ;
           irHar = mkHar ht (getHarConP sg) ;
       in
-        mkNoun
-          sn
-          (addSuffix sg irHar accSuffix)
-          (addSuffix sg irHar datSuffix)
-          (addSuffix sg har genSuffix)
-          (addSuffix sn har locSuffix)
-          (addSuffix sn har ablatSuffix)
-          (addSuffix sn har abessPosSuffix)
-          sg
-          pln
-          har ;
+      mkNoun sn
+            (addSuffix sg irHar accSuffix)
+      (addSuffix sg irHar datSuffix)
+            (addSuffix sg har genSuffix)
+            (addSuffix sn har locSuffix)
+      (addSuffix sn har ablatSuffix)
+      (addSuffix sn har abessPosSuffix)
+      (addSuffix sn har abessNegSuffix)
+      sg
+            pln
+            har ;
 
     regN sn =
       let har = getHarmony sn ;
@@ -328,17 +326,16 @@ resource ParadigmsTur = open
           bt = getBaseTable sn
       in
       mkNoun sn
-        (addSuffix bt har accSuffix)
-        (addSuffix bt har datSuffix)
-        (addSuffix bt har genSuffix)
-        (addSuffix bt har locSuffix)
-        (addSuffix bt har ablatSuffix)
-        (addSuffix bt har abessPosSuffix)
-        (addSuffix bt har abessNegSuffix)
-        (addSuffix bt har condSuffix)
-        (bt ! Soft)
-        pln
-        har ;
+            (addSuffix bt har accSuffix)
+            (addSuffix bt har datSuffix)
+      (addSuffix bt har genSuffix)
+      (addSuffix bt har locSuffix)
+      (addSuffix bt har ablatSuffix)
+      (addSuffix bt har abessPosSuffix)
+      (addSuffix bt har abessNegSuffix)
+      (bt ! Soft)
+      pln
+      har ;
 
     regPN sn = makePN sn sn ;
 
@@ -369,70 +366,45 @@ resource ParadigmsTur = open
             n2pb = n2.gen ! Pl ! {n = Sg;  p = P3} ;--yağları
             n2AbessPos = n2. s ! Sg ! Abess Pos ;
             n2AbessNeg = n2. s ! Sg ! Abess Neg ;
-            con =
-              case ct of {
-                Con =>
-                  < n1sn +  n2sn
-                  , n1sn +  n2sb
-                  , n1sn +  n2pn
-                  , n1sn +  n2pb
-                  , n1sn +  n2AbessPos
-                  , n1sn +  n2AbessNeg
-                  > ;
-                Sep =>
-                  < n1sn ++ n2sn
-                  , n1sn ++ n2sb
-                  , n1sn ++ n2pn
-                  , n1sn ++ n2pb
-                  , n1sn ++ n2AbessPos
-                  , n1sn ++ n2AbessNeg
-                  >
-              } ;
-            sb = con.p1 ; -- tereyağ
-            sn = con.p2 ; -- tereyağı
-            pb = con.p3 ; -- tereyağlar
-            pn = con.p4 ; -- tereyağları
+            con = case ct of {
+                    Con => <n1sn +  n2sn, n1sn +  n2sb, n1sn +  n2pn, n1sn +  n2pb, n1sn +  n2AbessPos, n1sn +  n2AbessNeg> ;
+                    Sep => <n1sn ++ n2sn, n1sn ++ n2sb, n1sn ++ n2pn, n1sn ++ n2pb, n1sn ++ n2AbessPos, n1sn ++ n2AbessNeg>
+                  } ;
+            sb = con.p1 ;--tereyağ
+            sn = con.p2 ;--tereyağı
+            pb = con.p3 ;--tereyağlar
+            pn = con.p4 ;--tereyağları
             sgAbessPos = con.p5 ;
             sgAbessNeg = con.p6 ;
             sgHar = getHarmony sn ;
             plHar = getHarmony pn
-        in
-          lin N {
-            s = table {
-              Sg => table {
-              Nom       => sn ; --tereyağı
-              Acc       => addSuffix sn sgHar accSuffixN ;   -- tereyağını
-              Dat       => addSuffix sn sgHar datSuffixN ;   -- tereyağına
-              Gen       => addSuffix sn sgHar genSuffix ;    -- tereyağının
-              Loc       => addSuffix sn sgHar locSuffixN ;   -- tereyağında
-              Ablat     => addSuffix sn sgHar ablatSuffixN ; -- tereyağından
-              Abess Pos => sgAbessPos ; -- tereyağlı
-              Abess Neg => sgAbessNeg   -- tereyağsız
+        in lin N {
+          s   = table {
+                Sg => table {
+            Nom     => sn ; --tereyağı
+            Acc     => addSuffix sn sgHar accSuffixN ; --tereyağını
+            Dat     => addSuffix sn sgHar datSuffixN ; --tereyağına
+            Gen     => addSuffix sn sgHar genSuffix ; --tereyağının
+            Loc     => addSuffix sn sgHar locSuffixN ; --tereyağında
+            Ablat   => addSuffix sn sgHar ablatSuffixN ; --tereyağından
+            Abess Pos => sgAbessPos ; --tereyağlı
+                        Abess Neg => sgAbessNeg   --tereyağsız
           } ;
-          Pl => table {
-            Nom       =>
-              pn ; -- tereyağları
-            Acc       =>
-              addSuffix pn plHar accSuffixN ;             -- tereyağlarını
-            Dat       =>
-              addSuffix pn plHar datSuffixN ;             -- tereyağlarına
-            Gen       =>
-              addSuffix pn plHar genSuffix ;              -- tereyağlarının
-            Loc       =>
-              addSuffix pn plHar locSuffixN ;             -- tereyağlarında
-            Ablat     =>
-              addSuffix pn plHar ablatSuffixN ;           -- tereyağlarından
-            Abess Pos =>
-              addSuffix sgAbessPos plHar abessPosSuffix ; -- tereyağlılar
-            Abess Neg =>
-              addSuffix sgAbessNeg plHar abessNegSuffix   -- tereyağsızlar
+                Pl => table {
+            Nom     => pn ;--tereyağları
+            Acc     => addSuffix pn plHar accSuffixN ; --tereyağlarını
+            Dat     => addSuffix pn plHar datSuffixN ; --tereyağlarına
+            Gen     => addSuffix pn plHar genSuffix ; --tereyağlarının
+            Loc     => addSuffix pn plHar locSuffixN ; --tereyağlarında
+            Ablat   => addSuffix pn plHar ablatSuffixN ; --tereyağlarından
+            Abess   Pos => addSuffix sgAbessPos plHar abessPosSuffix ; --tereyağlılar
+            Abess   Neg => addSuffix sgAbessNeg plHar abessNegSuffix   --tereyağsızlar
                       }
+                  } ;
+          gen = case ct of {
+                  Con => \\num,agr => n1sn + n2.gen ! num ! agr ;
+                  Sep => \\num,agr => n1sn ++ n2.gen ! num ! agr
           } ;
-          gen =
-            case ct of {
-              Con => \\num,agr => n1sn + n2.gen ! num ! agr ;
-              Sep => \\num,agr => n1sn ++ n2.gen ! num ! agr
-            } ;
     harmony = sgHar
       } ;
 
@@ -562,8 +534,7 @@ resource ParadigmsTur = open
                 Hard => base
         } ;
 
-    -- following two functions are to help deciding har type of nouns like
-    --  vakit, hasut.
+    -- following two functions are to help deciding har type of nouns like vakit, hasut
     getComplexHarmony : Str -> Str -> HarVowP =
       \sn,sg -> case <(getHarVowP sn), (getHarVowP sg)> of {
                   <(I_Har | U_Har)  , Ih_Har> => I_Har  ;

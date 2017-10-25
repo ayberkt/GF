@@ -8,18 +8,8 @@ resource ResTur = ParamX ** open Prelude, Predef, HarmonyTur in {
     coding=utf8 ;
 
   param
-    Case =
-       Nom
-     | Acc
-     | Dat
-     | Gen
-     | Loc
-     | Ablat
-     | Abess Polarity
-     ;
-
+    Case = Nom | Acc | Dat | Gen | Loc | Ablat | Abess Polarity ;
     Species = Indef | Def ;
-
     Contiguity = Con | Sep ; --Concatenate or Separate
 
   oper
