@@ -148,6 +148,10 @@ concrete StructuralTur of Structural = CatTur **
     to_Prep   = mkPrep "" Dat ;
     from_Prep = mkPrep "" Ablat ;
 
+    -- TODO: this is probably not correct. There is no straightforward
+    -- translation for `possess_Prep` in Turkish.
+    possess_Prep = mkPrep "" Gen ;
+
     -- There are four senses of "through" as a preposition in English:
     --
     --   1. from one side of an opening to the other ("go through the window"),
