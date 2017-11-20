@@ -147,6 +147,18 @@ concrete StructuralTur of Structural = CatTur **
     to_Prep   = mkPrep "" Dat ;
     from_Prep = mkPrep "" Ablat ;
 
+    -- There are four senses of "through" as a preposition in English:
+    --
+    --   1. from one side of an opening to the other ("go through the window"),
+    --   2. entering, then later leaving ("drive through the town"),
+    --   3. by means of ("win through intimidation"), and
+    --   4. to or up to ("1945 to 1991").
+    --
+    -- All four of these would be translated in a different way to Turkish
+    -- so I don't know what's the best way to implement `through_Prep`. The
+    -- best thing to do is to just probably implement the most common use.
+    -- TODO: implement linearization for through_Prep.
+
     -- TODO: there is really no have_V2 in Turkish.
     -- have_V2
 
