@@ -11,7 +11,9 @@ concrete StructuralTur of Structural = CatTur **
       mkPron "o" "onu" "ona" "onun" "onda" "ondan" "onlu" "onsuz" Sg P3 ;
 
     i_Pron  =
-      mkPron "ben" "beni" "bana" "benim" "bende" "benden" "benli" "bensiz" Sg P1 ;
+      mkPron "ben" "beni" "bana" "benim"
+             "bende" "benden" "benli" "bensiz"
+             Sg P1 ;
 
     it_Pron =
       mkPron "o" "onu" "ona" "onun" "onda" "ondan" "onlu" "onsuz" Sg P3 ;
