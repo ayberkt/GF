@@ -98,6 +98,7 @@ concrete StructuralTur of Structural = CatTur **
     everything_NP = mkNP (mkN "herşey")     Sg P3 ;
     nothing_NP    = mkNP (mkN "hiçbir şey") Sg P3 ;
     somebody_NP   = mkNP (mkN "biri")       Sg P3 ;
+    something_NP  = mkNP (mkN "bir şey")    Sg P3 ;
 
     -- The sentence (PredVP (UsePron he_Pron) (UseV sing_V)) would be
     -- linearized as
