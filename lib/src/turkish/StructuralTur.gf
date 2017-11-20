@@ -174,6 +174,7 @@ concrete StructuralTur of Structural = CatTur **
     here7to_Adv = mkAdv "buraya" ;
 
     somewhere_Adv = mkAdv "bir yere" ;
+    there_Adv     = mkAdv "oraya" ;
 
     how8many_IDet = {s = "kaç tane"} ;
 
