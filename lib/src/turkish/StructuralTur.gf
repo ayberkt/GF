@@ -93,6 +93,7 @@ concrete StructuralTur of Structural = CatTur **
     always_AdV = {s = "her zaman"} ;
 
     but_PConj = ss "ama" ;
+    therefore_PConj = ss "dolayısıyla" ;
 
     everybody_NP  = mkNP (mkN "herkes")     Sg P3 ;
     everything_NP = mkNP (mkN "herşey")     Sg P3 ;
