@@ -167,4 +167,6 @@ concrete StructuralTur of Structural = CatTur **
 
     without_Prep = mkPrep "" (Abess Neg) ;
 
+    please_Voc = {s = "lütfen"} ;
+
 }
