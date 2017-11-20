@@ -142,6 +142,8 @@ concrete StructuralTur of Structural = CatTur **
 
     for_Prep = mkPrep "için" Nom ;
 
+    under_Prep = mkPrep "altında" Gen ;
+
     from_Prep = mkPrep "" Ablat ;
 
     -- TODO: there is really no have_V2 in Turkish.
