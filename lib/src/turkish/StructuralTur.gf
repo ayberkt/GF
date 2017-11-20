@@ -29,6 +29,9 @@ concrete StructuralTur of Structural = CatTur **
     this_Quant =
       mkQuant "bu" ;
 
+    no_Quant =
+      mkQuant "hiç" ;
+
     we_Pron =
       mkPron "biz" "bizi" "bize" "bizim" "bizde" "bizden" "bizli" "bizsiz" Pl P1 ;
 
