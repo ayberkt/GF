@@ -94,8 +94,8 @@ concrete StructuralTur of Structural = CatTur **
 
     but_PConj = ss "ama" ;
 
-    everybody_NP  = mkNP (mkN "herkes")    Sg P3 ;
-    everything_NP = mkNP (mkN "herşey")    Sg P3 ;
+    everybody_NP  = mkNP (mkN "herkes")     Sg P3 ;
+    everything_NP = mkNP (mkN "herşey")     Sg P3 ;
     nothing_NP    = mkNP (mkN "hiçbir şey") Sg P3 ;
 
     -- The sentence (PredVP (UsePron he_Pron) (UseV sing_V)) would be
