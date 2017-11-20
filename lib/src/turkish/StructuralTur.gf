@@ -121,6 +121,8 @@ concrete StructuralTur of Structural = CatTur **
 
     although_Subj  = {s = "buna rağmen"} ;
 
+    that_Subj = {s = "o"} ;
+
     because_Subj   = {s = "çünkü"} ;
 
     here_Adv       = mkAdv "burada" ;
