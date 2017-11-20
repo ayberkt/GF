@@ -149,7 +149,7 @@ concrete StructuralTur of Structural = CatTur **
     -- This is really just `here_Adv` in dative form.
     here7to_Adv = mkAdv "buraya" ;
 
-    somewhere_Adv = mkAdv "bir yere"
+    somewhere_Adv = mkAdv "bir yere" ;
 
     how8many_IDet = {s = "kaç tane"} ;
 
