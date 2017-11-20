@@ -123,6 +123,10 @@ concrete StructuralTur of Structural = CatTur **
 
     that_Subj = {s = "o"} ;
 
+    -- TODO: this does not straightforwardly translate to Turkish which does
+    -- not have a "when" as a subordinating conjunction.
+    when_Subj = {s = "[TODO]"} ;
+
     because_Subj   = {s = "çünkü"} ;
 
     here_Adv       = mkAdv "burada" ;
