@@ -120,4 +120,11 @@ concrete NounTur of Noun = CatTur ** open ResTur, SuffixTur, HarmonyTur, Prelude
       harmony = f.harmony ;
     } ;
 
+    -- TODO: not entirely sure `CountNP` is sensible in Turkish but it should
+    -- look something like this.
+    CountNP det np = {
+      s = \\c => det.s ++ np.s ! Ablat ;
+      a = np.a
+    } ;
+
 }
