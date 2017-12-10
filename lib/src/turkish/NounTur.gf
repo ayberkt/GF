@@ -167,4 +167,11 @@ concrete NounTur of Noun = CatTur ** open ResTur, SuffixTur, HarmonyTur, Prelude
       gen = cn.gen
     } ;
 
+    -- TODO: currently I am not able to generate trees for this but should be
+    -- quite close what is needed.
+    PredetNP pred np = {
+      s = \\c => pred.s ++ np.s ! c ;
+      a = np.a
+    } ;
+
 }
