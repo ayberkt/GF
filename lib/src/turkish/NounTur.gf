@@ -153,4 +153,13 @@ concrete NounTur of Noun = CatTur ** open ResTur, SuffixTur, HarmonyTur, Prelude
       a = np.a
     } ;
 
+    -- TODO: some tweaking will be needed when getting the
+    -- getting genitive constructions to work correctly.
+    --
+    -- Further check the correctness.
+    PartNP cn np = {
+      s   = \\n,c => np.s ! Gen ++ cn.s ! n ! c ;
+      gen = cn.gen
+    } ;
+
 }
