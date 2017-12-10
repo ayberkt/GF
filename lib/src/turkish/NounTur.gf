@@ -113,4 +113,11 @@ concrete NounTur of Noun = CatTur ** open ResTur, SuffixTur, HarmonyTur, Prelude
       gen = cn.gen
     } ;
 
+    ComplN3 f x = {
+      s       = \\n, c => x.s ! Ablat ++ f.s ! n ! c ;
+      gen     = f.gen ;
+      c       = f.c2 ;
+      harmony = f.harmony ;
+    } ;
+
 }
