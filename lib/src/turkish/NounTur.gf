@@ -107,4 +107,10 @@ concrete NounTur of Noun = CatTur ** open ResTur, SuffixTur, HarmonyTur, Prelude
       s = \\n,c => det.s ! n ! c ++ ap.s ! n ! c
     } ;
 
+    -- TODO: further test how correct this is.
+    ApposCN cn np = {
+      s = \\n,c => cn.s ! n ! c ++ np.s ! c ;
+      gen = cn.gen
+    } ;
+
 }
