@@ -148,4 +148,9 @@ concrete NounTur of Noun = CatTur ** open ResTur, SuffixTur, HarmonyTur, Prelude
       s = \\num,cs => (n.s ! NOrd ! Sg ! cs) ++ a.s ! Sg ! cs
     } ;
 
+    PPartNP np v2 = {
+      s = \\c => np.s ! c ++ v2.s ! (VPast np.a);
+      a = np.a
+    } ;
+
 }
