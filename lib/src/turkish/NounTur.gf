@@ -158,6 +158,11 @@ concrete NounTur of Noun = CatTur ** open ResTur, SuffixTur, HarmonyTur, Prelude
     --
     -- Further check the correctness.
     PartNP cn np = {
+      s   = \\n,c => np.s ! Gen ++ cn.s ! n ! Gen ;
+      gen = cn.gen
+    } ;
+
+    PossNP cn np = {
       s   = \\n,c => np.s ! Gen ++ cn.s ! n ! c ;
       gen = cn.gen
     } ;
