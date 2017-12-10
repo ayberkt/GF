@@ -140,4 +140,8 @@ concrete NounTur of Noun = CatTur ** open ResTur, SuffixTur, HarmonyTur, Prelude
       a = np.a
     } ;
 
+    NumDigits n = {
+      s = n.s ! NCard ; n = n.n
+    } ;
+
 }
