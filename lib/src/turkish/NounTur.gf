@@ -129,4 +129,10 @@ concrete NounTur of Noun = CatTur ** open ResTur, SuffixTur, HarmonyTur, Prelude
 
     DetDAP d = { s = \\n,c => d.s } ;
 
+    -- TODO: further check the correctness of this.
+    DetNP det = {
+      s = \\c => det.s ;
+      a = {n = det.n ; p = P1}
+    } ;
+
 }
