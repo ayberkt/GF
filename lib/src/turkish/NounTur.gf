@@ -10,7 +10,7 @@ concrete NounTur of Noun = CatTur ** open ResTur, SuffixTur, HarmonyTur, Prelude
         case det.useGen of {
           NoGen => \\c => det.s ++ cn.s ! det.n ! c ;
           YesGen a => \\c => det.s ++ cn.gen ! det.n ! a ;
-          UseIndef => \\c => det.s ++ cn.s ! det.n ! Nom
+          UseIndef => \\c => det.s ++ cn.s ! det.n ! c
         } ;
       a = agrP3 det.n
       } ;
