@@ -12,6 +12,10 @@ concrete VerbTur of Verb = CatTur ** open ResTur in {
       s = \\f => adv.s ++ vp.s ! f
     } ;
 
+    AdvVP vp adv = {
+      s = \\f => adv.s ++ vp.s ! f
+    } ;
+
     UseComp comp = {s = \\_ => comp.s} ;
 
 }
