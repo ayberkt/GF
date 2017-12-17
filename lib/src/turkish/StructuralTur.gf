@@ -190,7 +190,8 @@ concrete StructuralTur of Structural = CatTur **
     in8front_Prep = mkPrep "önünde" Gen ;
 
     language_title_Utt = {s = "Türkçe"} ;
-    -- TODO: more_CAdv
+
+    more_CAdv = {s = "daha"; p = "daha"} ;
 
     most_Predet = {s = "en çok"} ;
 
