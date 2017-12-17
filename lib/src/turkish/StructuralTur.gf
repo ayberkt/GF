@@ -200,4 +200,6 @@ concrete StructuralTur of Structural = CatTur **
 
     please_Voc = {s = "lütfen"} ;
 
+    very_AdA = {s = "çok"} ;
+
 }
