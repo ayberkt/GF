@@ -204,4 +204,6 @@ concrete StructuralTur of Structural = CatTur **
     very_AdA = {s = "çok"} ;
 
     why_IAdv   = {s = "neden"} ;
+    where_IAdv = {s = "nerede"} ;
+
 }
