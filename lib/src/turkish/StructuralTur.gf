@@ -218,4 +218,9 @@ concrete StructuralTur of Structural = CatTur **
       s = "(TODO: must_VV)"
     } ;
 
+
+    quite_Adv = {
+      s = "bayağı"
+    } ;
+
 }
