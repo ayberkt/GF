@@ -16,11 +16,11 @@ concrete PhraseDut of Phrase = CatDut ** open Prelude, ResDut in
     UttIP ip = {s = ip.s ! NPNom} ; --- Acc also
     UttIAdv iadv = iadv ;
     UttNP np = {s = np.s ! NPNom} ;
-    UttVP vp = {s = useInfVP True vp} ;  -- without zu
+    UttVP vp = {s = useInfVP True vp ! agrP3 Sg } ;  -- without zu
     UttAdv adv = adv ;
     UttCN n = {s = n.s ! Strong ! NF Sg Nom} ;
     UttCard n = {s = n.s ! Utr ! Nom} ;
-    UttAP ap = {s = ap.s ! APred} ;
+    UttAP ap = {s = ap.s ! agrP3 Sg ! APred} ;
 
     UttInterj i = i ;
     UttAdV a = a ;
@@ -29,6 +29,6 @@ concrete PhraseDut of Phrase = CatDut ** open Prelude, ResDut in
     PConjConj conj = ss (conj.s2) ;
 
     NoVoc = {s = []} ;
-    VocNP np = {s = "," ++ np.s ! NPNom} ;
+    VocNP np = {s = bindComma ++ np.s ! NPNom} ;
 
 }

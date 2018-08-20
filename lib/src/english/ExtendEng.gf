@@ -10,7 +10,7 @@ concrete ExtendEng of Extend =
     MkVPS2, ConjVPS2, ComplVPS2, MkVPI2, ConjVPI2, ComplVPI2,
     Base_nr_RNP, Base_rn_RNP, Base_rr_RNP, ByVP, CompBareCN,
     CompIQuant, CompQS, CompS, CompVP, ComplBareVS, ComplGenVV, ComplSlashPartLast, ComplVPSVV, CompoundAP,
-    CompoundN, ConjRNP, ConjVPS, ConsVPS, Cons_nr_RNP, Cons_rr_RNP, DetNPFem, EmbedPresPart, EmptyRelSlash,
+    CompoundN, ConjRNP, ConjVPS, ConsVPS, Cons_nr_RNP, Cons_rr_RNP, DetNPMasc, DetNPFem, EmbedPresPart, EmptyRelSlash,
     ExistsNP, ExistCN, ExistMassCN, ExistPluralCN,
     FocusAP, FocusAdV, FocusAdv, FocusObj, GenIP, GenModIP, GenModNP, GenNP, GenRP,
     GerundAdv, GerundCN, GerundNP, IAdvAdv, ICompAP, InOrderToVP, MkVPS, NominalizeVPSlashNP,
@@ -30,10 +30,10 @@ concrete ExtendEng of Extend =
     ParadigmsEng in {
 
   lin
-    GenNP np = {s = \\_,_ => np.s ! npGen ; sp = \\_,_,_ => np.s ! npGen} ;
+    GenNP np = {s = \\_,_ => np.s ! npGen ; sp = \\_,_,_,_ => np.s ! npGen ; isDef = True} ;
     GenIP ip = {s = \\_ => ip.s ! NCase Gen} ;
     GenRP nu cn = {
-      s = \\c => "whose" ++ nu.s ! Nom ++ 
+      s = \\c => "whose" ++ nu.s ! False ! Nom ++ 
                  case c of {
                    RC _ (NCase Gen) => cn.s ! nu.n ! Gen ;
                    _ => cn.s ! nu.n ! Nom
@@ -58,6 +58,15 @@ concrete ExtendEng of Extend =
       c = NPAcc
       } ;
 
+    DetNPMasc det = {
+      s = det.sp ! Masc ! False ;
+      a = agrgP3 det.n Masc
+      } ;
+
+    DetNPFem det = {
+      s = det.sp ! Fem ! False ;
+      a = agrgP3 det.n Fem
+      } ;
 
   lincat
     VPS   = {s : Agr => Str} ;
@@ -141,7 +150,7 @@ concrete ExtendEng of Extend =
       isPre = vp.isSimple                 -- depends on whether there are complements
       } ;
 
-    EmbedPresPart vp = {s = infVP VVPresPart vp Simul CPos (agrP3 Sg)} ; --- agr
+    EmbedPresPart vp = {s = \\a => infVP VVPresPart vp False Simul CPos a} ;
 
    PastPartAP vp = { 
       s = \\a => vp.ad ! a ++ vp.ptp ++ vp.p ++ vp.c2 ++ vp.s2 ! a ++ vp.ext ;
@@ -176,9 +185,9 @@ concrete ExtendEng of Extend =
 
    WithoutVP vp = {s = "without" ++ (GerundAdv (lin VP vp)).s} ; 
 
-   InOrderToVP vp = {s = ("in order" | []) ++ infVP VVInf vp Simul CPos (AgP3Sg Neutr)} ;
+   InOrderToVP vp = {s = ("in order" | []) ++ infVP VVInf vp False Simul CPos (AgP3Sg Neutr)} ;
 
-   PurposeVP vp = {s = infVP VVInf vp Simul CPos (agrP3 Sg)} ; --- agr
+   PurposeVP vp = {s = infVP VVInf vp False Simul CPos (agrP3 Sg)} ; --- agr
 
    ByVP vp = {s = "by" ++ (GerundAdv (lin VP vp)).s} ; 
 
@@ -242,12 +251,13 @@ concrete ExtendEng of Extend =
    SlashBareV2S v s = insertExtrac s.s (predVc v) ;
 
   CompoundN noun cn = {
-    s = (\\n,c => noun.s ! Sg ! Nom ++ cn.s ! n ! c) ;
+    s = \\n,c => noun.s ! Sg ! Nom ++ cn.s ! n ! c ;
     g = cn.g
   } ;
   
   CompoundAP noun adj = {
-    s = (\\_ => noun.s ! Sg ! Nom ++ adj.s ! AAdj Posit Nom) ;
+    s = variants {\\_ => noun.s ! Sg ! Nom ++                    adj.s ! AAdj Posit Nom ;
+                  \\_ => noun.s ! Sg ! Nom ++ BIND++"-"++BIND ++ adj.s ! AAdj Posit Nom} ;
     isPre = True
     } ;
 
@@ -282,6 +292,8 @@ concrete ExtendEng of Extend =
 
 
   lin
+    AdAdV = cc2 ;
+
     AdjAsCN ap = let cn = mkNoun "one" "one's" "ones" "ones'" ** {g = Neutr}
       in {
         s = \\n,c => preOrPost ap.isPre (ap.s ! agrgP3 n cn.g) (cn.s ! n ! c) ;
@@ -292,6 +304,8 @@ concrete ExtendEng of Extend =
       a = agrgP3 Sg nonhuman
       } ;
 
+    PositAdVAdj a = {s = a.s ! AAdv} ;
+
   lincat
     RNP     = {s : Agr => Str} ;
     RNPList = {s1,s2 : Agr => Str} ;
@@ -299,7 +313,7 @@ concrete ExtendEng of Extend =
   lin 
     ReflRNP vps rnp = insertObjPre (\\a => vps.c2 ++ rnp.s ! a) vps ;
     ReflPron = {s = reflPron} ;
-    ReflPoss num cn = {s = \\a => possPron ! a ++ num.s ! Nom ++ cn.s ! num.n ! Nom} ;
+    ReflPoss num cn = {s = \\a => possPron ! a ++ num.s ! True ! Nom ++ cn.s ! num.n ! Nom} ;
     PredetRNP predet rnp = {s = \\a => predet.s ++ rnp.s ! a} ;
 
     ConjRNP conj rpns = conjunctDistrTable Agr conj rpns ;
@@ -310,22 +324,25 @@ concrete ExtendEng of Extend =
     Cons_rr_RNP x xs = consrTable Agr comma x xs ;
     Cons_nr_RNP x xs = consrTable Agr comma {s = \\a => x.s ! NPAcc} xs ;
 
-    
+  lin
+    ApposNP np1 np2 = {s = \\c => np1.s ! c ++ comma ++ np2.s ! c; a = np1.a} ;
+
 ---- TODO: RNPList construction
 
+  lin
     ComplGenVV v a p vp = insertObj (\\agr => a.s ++ p.s ++ 
-                                         infVP v.typ vp a.a p.p agr)
+                                         infVP v.typ vp False a.a p.p agr)
                                (predVV v) ;
 
     CompS s = {s = \\_ => "that" ++ s.s} ;
     CompQS qs = {s = \\_ => qs.s ! QIndir} ;
     CompVP ant p vp = {s = \\a => ant.s ++ p.s ++ 
-                                infVP VVInf vp ant.a p.p a} ;
+                                infVP VVInf vp False ant.a p.p a} ;
 
 -- quite specific for English anyway
 
     UncontractedNeg = {s = [] ; p = CNeg False} ; 
-    UttVPShort vp = {s = infVP VVAux vp Simul CPos (agrP3 Sg)} ;
+    UttVPShort vp = {s = infVP VVAux vp False Simul CPos (agrP3 Sg)} ;
 
 
 

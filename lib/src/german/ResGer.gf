@@ -520,7 +520,10 @@ resource ResGer = ParamX ** open Prelude in {
 	  subjc : Preposition     -- determines case of "subj"
 	} ;
 
-  predV : Verb -> VP = predVGen False ;
+  predV : Verb -> VPSlash = predVGen False ;
+
+  predVc : Verb ** {c2 : Preposition} -> VPSlash = \v ->
+    predV v ** {c2 = v.c2} ;
 
   useVP : VP -> VPC = \vp ->
     let
@@ -577,7 +580,7 @@ resource ResGer = ParamX ** open Prelude in {
     } ;
 
 
-  predVGen : Bool -> Verb -> VP = \isAux, verb -> {
+  predVGen : Bool -> Verb -> VPSlash = \isAux, verb -> {
     s = {
      s = verb.s ;
      prefix = verb.prefix ;
@@ -594,7 +597,10 @@ resource ResGer = ParamX ** open Prelude in {
       } ;
     isAux = isAux ; ----
     inf,ext,infExt,adj : Str = [] ;
-    subjc = PrepNom
+    subjc = PrepNom ;
+    -- Dummy values for subtyping.
+    c2 = noPreposition Nom ;
+    missingAdv = False
     } ;
 
   auxPerfect : Verb -> VForm => Str = \verb ->
@@ -654,13 +660,20 @@ resource ResGer = ParamX ** open Prelude in {
       Neg => "nicht"
       } ;
 
-  VPSlash = VP ** {c2 : Preposition} ;
+  VPSlash = VP ** {c2 : Preposition ; missingAdv : Bool } ;
+
+  -- IL 24/04/2018 Fixing the scope of reflexives
+  objAgr : { a : Agr } -> VP -> VP = \obj,vp -> vp ** {
+    nn = \\a => vp.nn ! obj.a } ;
 
 -- Extending a verb phrase with new constituents.
 
-  insertObj : (Agr => Str) -> VP -> VP = insertObjNP False ;
+  insertObj : (Agr => Str) -> VPSlash -> VPSlash = insertObjNP False ;
 
-  insertObjNP : Bool -> (Agr => Str) -> VP -> VP = \isPron, obj,vp -> vp ** {
+  insertObjc : (Agr => Str) -> VPSlash -> VPSlash = \obj,vp ->
+    insertObj obj vp ** {c2 = vp.c2 ; missingAdv = vp.missingAdv } ;
+
+  insertObjNP : Bool -> (Agr => Str) -> VPSlash -> VPSlash = \isPron, obj,vp -> vp ** {
     nn = \\a => 
       let vpnn = vp.nn ! a in 
       case isPron of {
@@ -682,16 +695,16 @@ resource ResGer = ParamX ** open Prelude in {
   insertAdv : Str -> VP -> VP = \adv,vp -> vp ** {
     a2 = vp.a2 ++ adv } ;
 
-  insertExtrapos : Str -> VP -> VP = \ext,vp -> vp ** {
+  insertExtrapos : Str -> VPSlash -> VPSlash = \ext,vp -> vp ** {
     ext = vp.ext ++ ext } ;
 
-  insertInfExt : Str -> VP -> VP = \infExt,vp -> vp ** {
+  insertInfExt : Str -> VPSlash -> VPSlash = \infExt,vp -> vp ** {
 	infExt = vp.infExt ++ infExt } ;
 
-  insertInf : Str -> VP -> VP = \inf,vp -> vp ** {
+  insertInf : Str -> VPSlash -> VPSlash = \inf,vp -> vp ** {
     inf = inf ++ vp.inf } ;
 
-  insertAdj : Str -> Str * Str -> Str -> VP -> VP = \adj,c,ext,vp -> vp ** { 
+  insertAdj : Str -> Str * Str -> Str -> VPSlash -> VPSlash = \adj,c,ext,vp -> vp ** {
     nn = \\a => 
       let vpnn = vp.nn ! a in 
 		<vpnn.p1 ++ c.p1 , vpnn.p2> ;
@@ -755,14 +768,14 @@ resource ResGer = ParamX ** open Prelude in {
   infVP : Bool -> VP -> ((Agr => Str) * Str * Str * Str) = \isAux, vp -> let vps = useVP vp in
     <
      \\agr => (vp.nn ! agr).p1 ++ (vp.nn ! agr).p2 ++  vp.a2,
-     vp.a1 ! Pos ++ (vps.s ! (notB isAux) ! agrP3 Sg ! VPInfinit Simul).inf,
+     vp.a1 ! Pos ++ vp.adj ++ (vps.s ! (notB isAux) ! agrP3 Sg ! VPInfinit Simul).inf,
      vp.inf,
-     vp.ext
+     vp.infExt ++ vp.ext
     > ;
 
   useInfVP : Bool -> VP -> Str = \isAux,vp ->
     let vpi = infVP isAux vp in
-    vpi.p1 ! agrP3 Sg ++ vpi.p3 ++ vpi.p2 ;
+    vpi.p1 ! agrP3 Sg ++ vpi.p3 ++ vpi.p2 ++ vpi.p4 ;
 
 -- The nominative case is not used as reflexive, but defined here
 -- so that we can reuse this in personal pronouns. 

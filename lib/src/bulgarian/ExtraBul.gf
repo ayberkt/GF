@@ -27,12 +27,11 @@ concrete ExtraBul of ExtraBulAbs = CatBul **
     } ;
 
     EmptyRelSlash slash = {
-      s = \\t,a,p,agr => slash.c2.s ++ whichRP ! agr.gn ++ slash.s ! agr ! t ! a ! p ! Main ;
-      role = RObj Acc
+      s = \\t,a,p,agr => slash.c2.s ++ whichRP ! agr.gn ++ slash.s ! agr ! t ! a ! p ! Main
       } ;
 
-    i8fem_Pron  = mkPron "аз" "мен" "ме" "ми" "мой" "моя" "моят" "моя" "моята" "мое" "моето" "мои" "моите" (GSg Fem)  P1 ;
-    i8neut_Pron = mkPron "аз" "мен" "ме" "ми" "мой" "моя" "моят" "моя" "моята" "мое" "моето" "мои" "моите" (GSg Neut) P1 ;
+    i8fem_Pron  = mkPron "аз" "мой" "моя" "моят" "моя" "моята" "мое" "моето" "мои" "моите" (GSg Fem)  PronP1 ;
+    i8neut_Pron = mkPron "аз" "мой" "моя" "моят" "моя" "моята" "мое" "моето" "мои" "моите" (GSg Neut) PronP1 ;
     
     whatSg8fem_IP  = mkIP "каква" "каква" (GSg Fem) ;
     whatSg8neut_IP = mkIP "какво" "какво" (GSg Neut) ;
@@ -40,8 +39,8 @@ concrete ExtraBul of ExtraBulAbs = CatBul **
     whoSg8fem_IP  = mkIP "коя" "кого" (GSg Fem) ;
     whoSg8neut_IP = mkIP "кое" "кого" (GSg Neut) ;
     
-    youSg8fem_Pron  = mkPron "ти" "теб" "те" "ти" "твой" "твоя" "твоят" "твоя" "твоята" "твое" "твоето" "твои" "твоите" (GSg Fem) P2 ;
-    youSg8neut_Pron = mkPron "ти" "теб" "те" "ти" "твой" "твоя" "твоят" "твоя" "твоята" "твое" "твоето" "твои" "твоите" (GSg Neut) P2 ;
+    youSg8fem_Pron  = mkPron "ти" "твой" "твоя" "твоят" "твоя" "твоята" "твое" "твоето" "твои" "твоите" (GSg Fem)  PronP2 ;
+    youSg8neut_Pron = mkPron "ти" "твой" "твоя" "твоят" "твоя" "твоята" "твое" "твоето" "твои" "твоите" (GSg Neut) PronP2 ;
 
     onePl_Num = {s = table {
                        CFMasc Indef _ | CFFem Indef | CFNeut Indef            => "едни" ;
@@ -56,27 +55,13 @@ concrete ExtraBul of ExtraBulAbs = CatBul **
     
     IAdvAdv adv = {s = \\qf => (mkIAdv "колко").s ! qf ++ adv.s} ;
 
-  oper
-    reflPron : AForm => Str =
-      table {
-        ASg Masc Indef => "свой" ;
-        ASg Masc Def   => "своя" ;
-        ASgMascDefNom  => "своят" ;
-        ASg Fem  Indef => "своя" ;
-        ASg Fem  Def   => "своята" ;
-        ASg Neut Indef => "свое" ;
-        ASg Neut Def   => "своето" ;
-        APl Indef      => "свои" ;
-        APl Def        => "своите"
-      } ;
-
   lincat
     VPI   = {s : Agr => Str} ;
-    [VPI] = {s : Bool => Ints 2 => Agr => Str} ;
+    [VPI] = {s : Bool => Ints 3 => Agr => Str} ;
 
   lin
     BaseVPI x y = {s  = \\d,t,a=>x.s!a++linCoord!t++y.s!a} ;
-    ConsVPI x xs = {s  = \\d,t,a=>x.s!a++(linCoordSep ResBul.comma)!d!t++xs.s!d!t!a} ;
+    ConsVPI x xs = {s  = \\d,t,a=>x.s!a++(linCoordSep bindComma)!d!t++xs.s!d!t!a} ;
 
     MkVPI vp = {s = daComplex Simul Pos vp ! Perf} ;
     ConjVPI conj vpi = {
@@ -87,13 +72,13 @@ concrete ExtraBul of ExtraBulAbs = CatBul **
 
   lincat
     VPS   = {s : Agr => Str} ;
-    [VPS] = {s : Bool => Ints 2 => Agr => Str} ;
+    [VPS] = {s : Bool => Ints 3 => Agr => Str} ;
 
   lin
     BaseVPS x y = {s  = \\d,t,a=>x.s!a++linCoord!t++y.s!a} ;
-    ConsVPS x xs = {s  = \\d,t,a=>x.s!a++(linCoordSep ResBul.comma)!d!t++xs.s!d!t!a} ;
+    ConsVPS x xs = {s  = \\d,t,a=>x.s!a++(linCoordSep bindComma)!d!t++xs.s!d!t!a} ;
 
-    PredVPS np vps = {s = np.s ! RSubj ++ vps.s ! np.a} ;
+    PredVPS np vps = {s = np.s ! RSubj ++ vps.s ! personAgr np.gn np.p} ;
 
     MkVPS t p vp = {
       s = \\a => 
@@ -110,7 +95,7 @@ concrete ExtraBul of ExtraBulAbs = CatBul **
                                        vp.compl1 ! a ++ vp.compl2 ! a) Pos (predV verbBe) ;
 
     PassAgentVPSlash vp np = ---- AR 9/4/2014: to be verified
-      insertObj (\\_ => "чрез" ++ np.s ! RObj Acc) Pos
+      insertObj (\\_ => "чрез" ++ np.s ! RObj CPrep) Pos
                      (insertObj (\\a => vp.s ! Perf ! VPassive (aform a.gn Indef (RObj Acc)) ++
                                        vp.compl1 ! a ++ vp.compl2 ! a) Pos (predV verbBe)) ;
 

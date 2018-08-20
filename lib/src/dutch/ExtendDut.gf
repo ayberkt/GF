@@ -2,7 +2,7 @@
 
 concrete ExtendDut of Extend =
   CatDut ** ExtendFunctor
---   - []                   -- put the names of your own definitions here
+   - [PastPartAP,ICompAP,IAdvAdv]
   with
     (Grammar = GrammarDut) **
   open
@@ -11,6 +11,18 @@ concrete ExtendDut of Extend =
     Coordination,
     Prelude,
     ParadigmsDut in {
-    -- put your own definitions here
+
+lin
+
+  PastPartAP vp = { --# notpresent
+    s = \\agr,af => let aForm = case vp.isHeavy of { --# notpresent
+                          True  => APred ; --# notpresent
+                          False => af } ; --# notpresent
+                     in (infClause [] agr vp aForm).s ! Past ! Anter ! Pos ! Sub ; --# notpresent
+    isPre = notB vp.isHeavy ; --# notpresent
+   } ; --# notpresent
     
-    }
+  ICompAP ap = {s = \\agr => "hoe" ++ ap.s ! agr ! APred} ; 
+
+  IAdvAdv adv = {s = "hoe" ++ adv.s} ;
+}

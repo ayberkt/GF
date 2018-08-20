@@ -102,7 +102,7 @@ lin
   industry_N = mk2N "industri" "industrier" ; ---- "ien" ??
   iron_N = regGenN "järn" neutrum ;
   king_N = (regGenN "kung" utrum) ;
-  know_V2 = mkV2 (mkV "känner") ;
+  know_V2 = mkV2 (mkV "känna" "kände" "känt") ;
   know_VQ = mkVQ (mkV "veta" "vet" "vet" "visste" "vetat" "visst") ;
   know_VS = mkVS (mkV "veta" "vet" "vet" "visste" "vetat" "visst") ;
   lake_N = mkN "sjö" "sjön" "sjöar" "sjöarna" ;
@@ -167,7 +167,7 @@ lin
   shirt_N = regGenN "skjorta" utrum ;
   shoe_N = mk2N "sko" "skor" ;
   shop_N = mk2N "affär" "affärer" ;
-  short_A = regA "kort" ;
+  short_A = mkA "kort" "kort" ;
   silver_N = mkN "silver" "silvret" "silver" "silvren" ;
   sister_N = mk2N "syster" "systrar" ;
   sleep_V = (irregV "sova" "sov" "sovit") ;
@@ -270,7 +270,7 @@ lin
   hair_N = mk2N "hår" "hår" ;
   hand_N = mk2N "hand" "händer" ;
   head_N = mkN "huvud" "huvudet" "huvuden" "huvudena" ;
-  heart_N = mkN "hjärta" "hjärtat" "hjärtan" "hjärtana" ;
+  heart_N = changeCompoundN "hjärt" (mkN "hjärta" "hjärtat" "hjärtan" "hjärtana") ;
   horn_N = mk2N "horn" "horn" ;
   husband_N = (mk2N "make" "makar") ;
   ice_N = mk2N "is" "isar" ;

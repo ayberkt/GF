@@ -1,4 +1,4 @@
-concrete CatEng of Cat = CommonX - [Pol] ** open ResEng, Prelude in {
+concrete CatEng of Cat = CommonX - [Pol,SC,CAdv] ** open ResEng, Prelude in {
 
   flags optimize=all_subs ;
 
@@ -49,6 +49,7 @@ concrete CatEng of Cat = CommonX - [Pol] ** open ResEng, Prelude in {
 -- Adjective
 
     AP = {s : Agr => Str ; isPre : Bool} ; 
+    SC = {s : Agr => Str} ;
 
 -- Noun
 
@@ -69,13 +70,12 @@ concrete CatEng of Cat = CommonX - [Pol] ** open ResEng, Prelude in {
     --    sp Nom         | Poss. pron. (subj.) | mine
     --    sp Gen         | Poss. pron. (obj.)  | mine's
     Pron = {s : NPCase => Str ; sp : Case => Str ; a : Agr} ;
-    Det = {s : Str ; sp : NPCase => Str ; n : Number ; hasNum : Bool} ;
+    DAP, Det = {s : Str ; sp : Gender => Bool => NPCase => Str ; n : Number ; hasNum : Bool} ;
     Predet = {s : Str} ;
     Ord = { s : Case => Str } ;
-    Num  = {s : Case => Str ; n : Number ; hasCard : Bool} ;
-    Card = {s : Case => Str ; n : Number} ;
-    Quant = {s : Bool => Number => Str ; sp : Bool => Number => NPCase => Str} ;
-    DAP = {s : Str ; n : Number} ;
+    Num  = {s,sp : Bool => Case => Str ; n : Number ; hasCard : Bool} ;
+    Card = {s,sp : Bool => Case => Str ; n : Number} ;
+    Quant = {s : Bool => Number => Str ; sp : Gender => Bool => Number => NPCase => Str; isDef : Bool} ;
 
 -- Numeral
 
@@ -85,10 +85,9 @@ concrete CatEng of Cat = CommonX - [Pol] ** open ResEng, Prelude in {
 -- Structural
 
     Conj = {s1,s2 : Str ; n : Number} ;
----b    Conj = {s : Str ; n : Number} ;
----b    DConj = {s1,s2 : Str ; n : Number} ;
     Subj = {s : Str} ;
     Prep = {s : Str; isPre : Bool} ;
+    CAdv = {s : Polarity => Str; p : Str} ;
 
 -- Open lexical classes, e.g. Lexicon
 
@@ -98,8 +97,8 @@ concrete CatEng of Cat = CommonX - [Pol] ** open ResEng, Prelude in {
     VV = {s : VVForm => Str ; p : Str ; typ : VVType} ;
     V2V = Verb ** {c2,c3 : Str ; typ : VVType} ;
 
-    A = {s : AForm => Str} ;
-    A2 = {s : AForm => Str ; c2 : Str} ;
+    A = {s : AForm => Str ; isPre : Bool} ;
+    A2 = {s : AForm => Str ; c2 : Str ; isPre : Bool} ;
 
     N = {s : Number => Case => Str ; g : Gender} ;
     N2 = {s : Number => Case => Str ; g : Gender} ** {c2 : Str} ;
@@ -111,7 +110,7 @@ concrete CatEng of Cat = CommonX - [Pol] ** open ResEng, Prelude in {
     ClSlash = \s -> {s = \\t,a,p,o => s; c2 = ""} ;
 
     VP = \s -> predV {s = \\_ => s; p = ""; isRefl = False} ;
-    VPSlash = \s -> predV {s = \\_ => s; p = ""; isRefl = False} ** {c2 = ""; gapInMiddle = False} ;
+    VPSlash = \s -> predV {s = \\_ => s; p = ""; isRefl = False} ** {c2 = ""; gapInMiddle = False; missingAdv = False } ;
 
     V, VS, VQ, VA = \s -> {s = \\_ => s; p = ""; isRefl = False} ;
     V2, V2A, V2Q, V2S = \s -> {s = \\_ => s; p = ""; isRefl = False; c2=""} ;
@@ -119,8 +118,8 @@ concrete CatEng of Cat = CommonX - [Pol] ** open ResEng, Prelude in {
     VV = \s -> {s = \\_ => s; p = ""; isRefl = False; typ = VVInf} ;
     V2V = \s -> {s = \\_ => s; p = ""; isRefl = False; c2,c3="" ; typ = VVInf} ;
 
-    A = \s -> {s = \\_ => s} ;
-    A2 = \s -> {s = \\_ => s; c2 = ""} ;
+    A = \s -> {s = \\_ => s; isPre = True} ;
+    A2 = \s -> {s = \\_ => s; c2 = ""; isPre = True} ;
 
     N = \s -> {s = \\_,_ => s; g = Neutr} ;
     N2 = \s -> {s = \\_,_ => s; c2 = ""; g = Neutr} ;
@@ -130,16 +129,16 @@ concrete CatEng of Cat = CommonX - [Pol] ** open ResEng, Prelude in {
     SSlash = \ss -> ss.s ++ ss.c2 ;
     ClSlash = \cls -> cls.s ! Pres ! Simul ! CPos ! oDir ++ cls.c2 ;
 
-    VP = \vp -> infVP VVAux vp Simul CPos (agrP3 Sg) ;
-    VPSlash = \vps -> infVP VVAux vps Simul CPos (agrP3 Sg) ++ vps.c2;
+    VP = \vp -> infVP VVAux vp False Simul CPos (agrP3 Sg) ;
+    VPSlash = \vps -> infVP VVAux vps False Simul CPos (agrP3 Sg) ++ vps.c2;
 
     Conj = \conj -> conj.s1 ++ conj.s2 ;
 
-    V, VS, VQ, VA = \v -> infVP VVAux (predV v) Simul CPos (agrP3 Sg);
-    V2, V2A, V2Q, V2S = \v -> infVP VVAux (predV v) Simul CPos (agrP3 Sg) ++ v.c2;
-    V3 = \v -> infVP VVAux (predV v) Simul CPos (agrP3 Sg) ++ v.c2 ++ v.c3;
-    VV = \v -> infVP VVAux (predVV v) Simul CPos (agrP3 Sg) ;
-    V2V = \v -> infVP VVAux (predVc v) Simul CPos (agrP3 Sg) ;
+    V, VS, VQ, VA = \v -> infVP VVAux (predV v) False Simul CPos (agrP3 Sg);
+    V2, V2A, V2Q, V2S = \v -> infVP VVAux (predV v) False Simul CPos (agrP3 Sg) ++ v.c2;
+    V3 = \v -> infVP VVAux (predV v) False Simul CPos (agrP3 Sg) ++ v.c2 ++ v.c3;
+    VV = \v -> infVP VVAux (predVV v) False Simul CPos (agrP3 Sg) ;
+    V2V = \v -> infVP VVAux (predVc v) False Simul CPos (agrP3 Sg) ;
 
     A = \a -> a.s ! AAdj Posit Nom ;
     A2 = \a -> a.s ! AAdj Posit Nom ++ a.c2 ;

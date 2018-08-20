@@ -104,7 +104,8 @@ oper
     topic : Str ;   -- topicalized item, before subject
     prePart : Str ; -- between subject and verb
     verb : Verb ; 
-    compl : Str     -- after verb
+    compl : Str ;    -- after verb
+    isAdj : Bool ;   -- whether it is an adjectival predication and behaves differently in relative 
     } ;
 
   NP = {s : Str} ; 
@@ -167,47 +168,30 @@ oper
       verb = v ; 
       compl = part ;
       prePart, topic = [] ;
+      isAdj = False ;
       } ; 
 
-  insertObj : NP -> VP -> VP = \np,vp -> {
-     verb  = vp.verb ;
+  insertObj : NP -> VP -> VP = \np,vp -> vp ** {
      compl = np.s ++ vp.compl ;
-     prePart = vp.prePart ;
-     topic = vp.topic
      } ; 
 
-  insertObjPost : NP -> VP -> VP = \np,vp -> {
-     verb  = vp.verb ;
+  insertObjPost : NP -> VP -> VP = \np,vp -> vp ** {
      compl = vp.compl ++ np.s ;
-     prePart = vp.prePart ;
-     topic = vp.topic
      } ; 
 
-   insertAdv : SS -> VP -> VP = \adv,vp -> {
-     verb  = vp.verb ;
-     compl = vp.compl ;
+   insertAdv : SS -> VP -> VP = \adv,vp -> vp ** {
      prePart = adv.s ++ vp.prePart ;
-     topic = vp.topic
      } ; 
 
-   insertTopic : SS -> VP -> VP = \adv,vp -> {
-     verb  = vp.verb ;
-     compl = vp.compl ;
-     prePart = vp.prePart ;
+   insertTopic : SS -> VP -> VP = \adv,vp -> vp ** {
      topic = adv.s ++ vp.topic
      } ; 
-   insertAdvPost : SS -> VP -> VP = \adv,vp -> {
-     verb  = vp.verb ;
-     compl = vp.compl ;
+   insertAdvPost : SS -> VP -> VP = \adv,vp -> vp ** {
      prePart = vp.prePart ++ adv.s ;
-     topic = vp.topic
      } ; 
 
-   insertPP : SS -> VP -> VP = \pp,vp -> {
-     verb  = vp.verb ;
-     compl = vp.compl ;
+   insertPP : SS -> VP -> VP = \pp,vp -> vp ** {
      prePart = vp.prePart ++ pp.s ;
-     topic = vp.topic
      } ; 
 
    insertExtra : SS -> VP -> VP = \ext,vp ->
@@ -266,13 +250,19 @@ oper
     s = word s
     } ;
 
-  Preposition = {prepPre : Str ; prepPost : Str ; advType : AdvType} ;  
+  Preposition = {prepPre : Str ; prepPost : Str ; advType : AdvType ; hasDe : Bool} ;  
     
   mkPreposition : Str -> Str -> AdvType -> Preposition = \s1,s2,at -> {
     prepPre  = word s1 ;
     prepPost = word s2 ;
-    advType = at
+    advType  = at ;
+    hasDe = advTypeHasDe at ;
     } ;
+
+  advTypeHasDe : AdvType -> Bool = \at -> case at of {
+      ATPoss => True ;
+      _ => False
+      } ; 
     
   getAdvType : Str -> AdvType = \s -> case s of {
     "的"     => ATPoss ;
@@ -280,8 +270,8 @@ oper
     _ => ATPlace False         -- uncertain whether ATPlace
     } ;
 
-  possessiveIf : AdvType -> Str = \at -> case at of {
-    ATPoss => [] ;   --- to avoid double "de" 
+  possessiveIf : Bool -> Str = \hasDe -> case hasDe of {
+    True => [] ;   --- to avoid double "de" 
     _ => possessive_s
     } ;
 

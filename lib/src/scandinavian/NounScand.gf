@@ -81,7 +81,10 @@ incomplete concrete NounScand of Noun =
       sp = \\b,g => quant.sp ! num.n ! b ! md b ! g ++ 
                     num.s ! g ;
       n = num.n ;
-      det = quant.det
+      det = case <quant.det,num.isDet> of {
+        <DDef Def,True> => DDef detDef ;
+        <d,_> => d
+        }
       } ;
 
     DetNP det = 
@@ -251,11 +254,11 @@ incomplete concrete NounScand of Noun =
       } ;
 
     AdjDAP det ap = {
-      s = \\b,g => det.s ! b ! g ++ ap.s ! agrAdj (gennum (ngen2gen g) det.n) det.det ; 
-      n = det.n ;
-      det = det.det ;
+      s,sp = \\b,g => det.s ! b ! g ++ ap.s ! agrAdj (gennum (ngen2gen g) det.n) det.det ;
+      n  = det.n ;
+      det= det.det ;
       } ;
 
-    DetDAP d = d ;  -- forgetting sp
+    DetDAP d = d ;
 
 }

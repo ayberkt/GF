@@ -10,7 +10,7 @@ lin
 
   -- : VV  -> VP -> VP ;  -- [lo egin/neska ikusi/jakin] nahi/ahal/behar dut
   ComplVV vv vp = 
-    let vcomp : Str = linVPPrc vp ;
+    let vcomp = linVPPrc vp ;
     in ResEus.insertComp vcomp (useV vv) ;
 
 
@@ -51,8 +51,8 @@ lin
 
 
   -- : V2V -> VP -> VPSlash ;  -- beg (her) to go
-  SlashV2V v2v vp = slashDObj v2v **   -- TODO: something wrong in this function!
-    { comp = \\agr => linVPPrc vp } ; --How about agreement with tense of the main clause???
+  SlashV2V v2v vp = slashDObj v2v ** 
+    { comp = linVPPrc vp } ; ---- No agreement with tense of the main clause
     
 
   -- : V2S -> S  -> VPSlash ;  -- answer (to him) that it is good
@@ -162,7 +162,11 @@ oper
 
   copulaVP : SyntVerb1 -> VerbPhrase = \izan ->
     ResEus.useV { prc = \\tns => [] ; 
-                  nstem = case izan of { Izan => "izate" ; _ => "egote" } ; --TODO is this correct?
+                  nstem = case izan of { 
+                            Izan => "izate" ; 
+                            Egon => "egote" ;
+                            Ibili => "ibiltze" ;
+                            _     => nonExist } ; 
                   val = Da izan } ;
 } 
 

@@ -1,6 +1,5 @@
 concrete StructuralEng of Structural = CatEng ** 
-  open MorphoEng, ResEng, ParadigmsEng, MakeStructuralEng, 
-  (C = ConstructX), Prelude in {
+  open MorphoEng, ResEng, ParadigmsEng, MakeStructuralEng, Prelude in {
 
   flags optimize=all ;
 
@@ -54,7 +53,7 @@ concrete StructuralEng of Structural = CatEng **
   during_Prep = mkPrep "during" ;
   either7or_DConj = mkConj "either" "or" singular ;
   everybody_NP = regNP "everybody" singular ;
-  every_Det = mkDeterminerSpec singular "every" "everyone" False ;
+  every_Det = mkDeterminerSpec singular "every" "everyone" "everything" False ;
   everything_NP = regNP "everything" singular ;
   everywhere_Adv = mkAdv "everywhere" ;
   few_Det = mkDeterminer plural "few" ;
@@ -73,9 +72,9 @@ concrete StructuralEng of Structural = CatEng **
   i_Pron  = mkPron "I" "me" "my" "mine" singular P1 human ;
   in_Prep = mkPrep "in" ;
   it_Pron  = mkPron "it" "it" "its" "its" singular P3 nonhuman ;
-  less_CAdv = C.mkCAdv "less" "than" ;
+  less_CAdv = mkCAdv "less" "no less" "than" ;
   many_Det = mkDeterminer plural "many" ;
-  more_CAdv = C.mkCAdv "more" "than" ;
+  more_CAdv = mkCAdv "more" "no more" "than" ;
   most_Predet = ss "most" ;
   much_Det = mkDeterminer singular "much" ;
   must_VV = {
@@ -153,7 +152,7 @@ concrete StructuralEng of Structural = CatEng **
 
   except_Prep = mkPrep "except" ;
 
-  as_CAdv = C.mkCAdv "as" "as" ;
+  as_CAdv = mkCAdv "as" "not as" "as" ;
 
   have_V2 = dirV2 (mk5V "have" "has" "had" "had" "having") ;
   that_Subj = ss "that" ;

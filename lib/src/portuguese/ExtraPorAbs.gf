@@ -1,4 +1,4 @@
--- Structures special for Spanish. These are not implemented in other
+-- Structures special for Portuguese. These are not implemented in other
 -- Romance languages.
 
 abstract ExtraPorAbs = ExtraRomanceAbs ** {
@@ -14,24 +14,24 @@ abstract ExtraPorAbs = ExtraRomanceAbs ** {
     this8fem_NP : NP ;
     those8fem_NP : NP ;
 
-    we8fem_Pron : Pron ;  -- nosotras
+    we8fem_Pron : Pron ;
     whoPl8fem_IP : IP ;
     whoSg8fem_IP : IP ;
 
     youSg8fem_Pron : Pron ;
-    youPl8fem_Pron : Pron ; -- vosotras
-    youPol8fem_Pron : Pron ; -- usted
+    youPl8fem_Pron : Pron ;
+    youPol8fem_Pron : Pron ;
 
-    youPolPl_Pron : Pron ;  -- ustedes
+    youPolPl_Pron : Pron ;
     youPolPl8fem_Pron : Pron ;
 
 
-    ImpNeg : NP -> VP -> Utt ; --"no fumes"
+    ImpNeg : NP -> VP -> Utt ; --"não fume"
     InvQuestCl : Cl -> QCl ;
-    
+
 
     PassVPSlash_ser : VPSlash -> VP ;
 
-    UseComp_estar : Comp -> VP ; -- esta lleno, as opposed to es lleno
+    UseComp_estar : Comp -> VP ; -- 'está cheio', instead of 'é cheio'
 
 }

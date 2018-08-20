@@ -35,8 +35,15 @@ oper
       = \a,b -> lin A (mkAdj a b) ;
     } ; 
 
-  mkA2 : Str -> A2 = \a -> lin A2 (simpleAdj a ** {c2 = emptyPrep}) ;
-
+  mkA2 = overload {
+    mkA2 : Str -> A2
+      = \a -> lin A2 (simpleAdj a ** {c2 = emptyPrep}) ;
+    mkA2 : A -> A2
+      = \a -> lin A2 (a ** {c2 = emptyPrep}) ;
+    mkA2 : A -> Prep -> A2
+      = \a,p -> lin A2 (a ** {c2 = p}) ;
+    } ;
+    
   mkV = overload {      
     mkV : (walk : Str) -> V 
       = \walk -> case walk of {
@@ -138,13 +145,13 @@ oper
 
   mkAdv = overload {
     mkAdv : Str -> Adv 
-      = \s -> lin Adv {s = word s ; advType = getAdvType s} ;
+      = \s -> let at = getAdvType s in lin Adv {s = word s ; advType = at ; hasDe = advTypeHasDe at} ;
     mkAdv : Str -> Str -> Adv 
-      = \s,t -> lin Adv {s = word (s + t) ; advType = getAdvType s} ; ----
+      = \s,t -> let at = getAdvType s in lin Adv {s = word (s + t) ; advType = at ; hasDe = advTypeHasDe at} ; ----
     mkAdv : Str -> AdvType -> Adv 
-      = \s,at -> lin Adv {s = word s ; advType = at} ;
+      = \s,at -> lin Adv {s = word s ; advType = at ; hasDe = advTypeHasDe at} ;
     mkAdv : Adv -> AdvType -> Adv -- To fix the AdvType in an Adv produced by SyntaxChi.mkAdv 
-      = \adv,at -> adv ** {advType = at} ;
+      = \adv,at -> adv ** {advType = at ; hasDe = advTypeHasDe at} ;
 
     } ;
 
@@ -202,7 +209,7 @@ oper
   mkPConj : Str -> PConj 
     = \s -> lin PConj {s = word s} ;
   mkRP : Str -> RP 
-    = \s -> lin RP {s = word s} ;
+    = \s -> lin RP {s = table {True => [] ; False => word s}} ;
 
 
 --. auxiliary

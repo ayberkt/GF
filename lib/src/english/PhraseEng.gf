@@ -12,10 +12,10 @@ concrete PhraseEng of Phrase = CatEng ** open Prelude, ResEng in {
     UttIP ip = {s = ip.s ! npNom} ; --- Acc also
     UttIAdv iadv = iadv ;
     UttNP np = {s = np.s ! npNom} ;
-    UttVP vp = {s = infVP VVInf vp Simul CPos (agrP3 Sg)} ;
+    UttVP vp = {s = infVP VVInf vp False Simul CPos (agrP3 Sg)} ;
     UttAdv adv = adv ;
     UttCN n = {s = n.s ! Sg ! Nom} ;
-    UttCard n = {s = n.s ! Nom} ;
+    UttCard n = {s = n.s ! False ! Nom} ;
     UttAP ap = {s = ap.s ! agrP3 Sg} ;
     UttInterj i = i ;
 
