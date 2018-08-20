@@ -227,4 +227,10 @@ concrete StructuralTur of Structural = CatTur **
     -- tricky.
     so_AdA = { s = "çok" } ;
 
+    -- TODO: not tested, probably wrong.
+    somePl_Det = { s = "bazı" ; n = Pl ; useGen = NoGen  } ;
+
+    -- TODO: not tested, probably wrong.
+    someSg_Det = { s = "bazı" ; n = Sg ; useGen = NOGen } ;
+
 }
