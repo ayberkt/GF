@@ -223,4 +223,8 @@ concrete StructuralTur of Structural = CatTur **
       s = "bayağı"
     } ;
 
+    -- TODO: there is probably a better translation for this and it is quite
+    -- tricky.
+    so_AdA = { s = "çok" } ;
+
 }
