@@ -206,4 +206,16 @@ concrete StructuralTur of Structural = CatTur **
     why_IAdv   = {s = "neden"} ;
     where_IAdv = {s = "nerede"} ;
 
+    can8know_VV = {
+      s = "(TODO: can8know_VV)"
+    } ;
+
+    can_VV = {
+      s = "(TODO: can_VV)"
+    } ;
+
+    must_VV = {
+      s = "(TODO: must_VV)"
+    } ;
+
 }
