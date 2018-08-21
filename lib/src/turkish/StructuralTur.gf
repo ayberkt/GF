@@ -266,4 +266,6 @@ concrete StructuralTur of Structural = CatTur **
     -- been merged.
     only_Predet = { s = "sadece" } ;
 
+    otherwise_PConj = { s = "(TODO: otherwise_PConj)" } ;
+
 }
