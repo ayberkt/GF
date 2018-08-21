@@ -184,7 +184,7 @@ concrete StructuralTur of Structural = CatTur **
 
     -- Conditionals in Turkish are handled through inflections.
     -- I will decide what to do with this later.
-    if_then_Conj = mkConj "" "" ;
+    if_then_Conj = mkConj "foo" "bar" ;
 
     -- TODO: in8front_Prep
     in8front_Prep = mkPrep "önünde" Gen ;
@@ -234,6 +234,6 @@ concrete StructuralTur of Structural = CatTur **
     somePl_Det = { s = "bazı" ; n = Pl ; useGen = NoGen  } ;
 
     -- TODO: not tested, probably wrong.
-    someSg_Det = { s = "bazı" ; n = Sg ; useGen = NOGen } ;
+    someSg_Det = { s = "bazı" ; n = Sg ; useGen = NoGen } ;
 
 }
