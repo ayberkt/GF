@@ -262,4 +262,8 @@ concrete StructuralTur of Structural = CatTur **
 
     whoSg_IP = { s = "kim" } ;
 
+    -- TODO: depends on `PredetNP`; test after the work in `NounTur.gf` has
+    -- been merged.
+    only_Predet = { s = "sadece" } ;
+
 }
