@@ -258,4 +258,8 @@ concrete StructuralTur of Structural = CatTur **
 
     which_IQuant = { s = "hangi" } ;
 
+    whoPl_IP = { s = "kimler" } ;
+
+    whoSg_IP = { s = "kim" } ;
+
 }
