@@ -242,4 +242,14 @@ concrete StructuralTur of Structural = CatTur **
 
     too_AdA = { s = "fazla" } ;
 
+    -- TODO: this depends on the linearization for `ComplVV` and is really a
+    -- morphological construct so it might be a bit tricky to implement.
+    want_VV = { s = "(TODO: want_VV)" } ;
+
+    whatPl_IP = { s = "neler" } ;
+
+    whatSg_IP = { s = "ne" } ;
+
+    what_IP = { s = "ne" } ;
+
 }
