@@ -240,4 +240,6 @@ concrete StructuralTur of Structural = CatTur **
 
     there7to_Adv = { s = "oraya" } ;
 
+    too_AdA = { s = "fazla" } ;
+
 }
