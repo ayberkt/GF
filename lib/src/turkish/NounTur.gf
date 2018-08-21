@@ -185,9 +185,10 @@ concrete NounTur of Noun = CatTur ** open ResTur, SuffixTur, HarmonyTur, Prelude
       gen = cn.gen
     } ;
 
-    RelNP cn np = {
-      s   = \\n,c => "(TODO: RelNP)" ;
-      gen = cn.gen ;
+    RelNP np rs = {
+      s   = \\c => "(TODO: RelNP)" ;
+      gen = np.gen ;
+      a   = np.a ;
       c   = np.c
     } ;
 
