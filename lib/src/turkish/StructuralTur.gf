@@ -236,4 +236,6 @@ concrete StructuralTur of Structural = CatTur **
     -- TODO: not tested, probably wrong.
     someSg_Det = { s = "bazı" ; n = Sg ; useGen = NoGen } ;
 
+    there7from_Adv = { s = "oradan" } ;
+
 }
