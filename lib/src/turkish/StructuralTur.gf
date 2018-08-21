@@ -238,4 +238,6 @@ concrete StructuralTur of Structural = CatTur **
 
     there7from_Adv = { s = "oradan" } ;
 
+    there7to_Adv = { s = "oraya" } ;
+
 }
