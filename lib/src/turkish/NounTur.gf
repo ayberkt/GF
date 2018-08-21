@@ -181,7 +181,7 @@ concrete NounTur of Noun = CatTur ** open ResTur, SuffixTur, HarmonyTur, Prelude
 
     -- TODO: currently not able to generate trees.
     RelCN cn rs = {
-      s   = \\n,c => "TODO: RelCN" ;
+      s   = \\n,c => "(TODO: RelCN)" ;
       gen = cn.gen
     } ;
 
