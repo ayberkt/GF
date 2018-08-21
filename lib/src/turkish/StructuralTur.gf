@@ -254,4 +254,6 @@ concrete StructuralTur of Structural = CatTur **
     -- plural "what" case and the singular "what" case.
     what_IP = { s = "ne" } ;
 
+    when_IAdv = { s = "ne zaman" } ;
+
 }
