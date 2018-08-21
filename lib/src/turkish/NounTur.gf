@@ -175,7 +175,7 @@ concrete NounTur of Noun = CatTur ** open ResTur, SuffixTur, HarmonyTur, Prelude
     } ;
 
     SentCN cn sc = {
-      s = \\n,c => "TODO" ;
+      s = \\n,c => "(TODO: SentCN)" ;
       gen = cn.gen
     } ;
 
