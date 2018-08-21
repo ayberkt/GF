@@ -256,4 +256,6 @@ concrete StructuralTur of Structural = CatTur **
 
     when_IAdv = { s = "ne zaman" } ;
 
+    which_IQuant = { s = "hangi" } ;
+
 }
