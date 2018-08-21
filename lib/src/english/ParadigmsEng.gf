@@ -190,7 +190,8 @@ oper
 
 -- Adverbs modifying adjectives and sentences can also be formed.
 
-  mkAdA : Str -> AdA ; -- e.g. quite
+  mkAdA  : Str -> AdA ; -- e.g. quite
+  mkCAdv : Str -> Str -> Str -> CAdv ;   -- more than/no more than
 
 -- Adverbs modifying numerals
 
@@ -373,7 +374,7 @@ mkInterj : Str -> Interj
     _ + ("io" | "oo")                         => w + "s" ;   -- radio, bamboo
     _ + ("s" | "z" | "x" | "sh" | "ch" | "o") => w + "es" ;  -- bus, hero
     _ + ("a" | "o" | "u" | "e") + "y"  => w + "s" ;   -- boy
-    x + "y"                            => x + "ies" ; -- fly
+    _ + "y"                            => init w + "ies" ; -- fly
     _                                  => w + "s"     -- car
     } ;
 
@@ -434,15 +435,17 @@ mkInterj : Str -> Interj
   nounPN n = lin PN {s = n.s ! singular ; g = n.g} ;
 
   mkQuant = overload {
-    mkQuant : (this, these : Str) -> Quant = \sg,pl -> mkQuantifier sg pl sg pl;
-    mkQuant : (no_sg, no_pl, none_sg, non_pl : Str) -> Quant = mkQuantifier;
+    mkQuant : (this, these : Str) -> Quant = \sg,pl -> mkQuantifier sg pl sg pl sg pl;
+    mkQuant : (no_sg, no_pl, none_sg, non_pl : Str) -> Quant = \sg,pl,sg',pl' -> mkQuantifier sg pl sg' pl' sg' pl';
   } ;
 
-  mkQuantifier : Str -> Str -> Str -> Str -> Quant = 
-   \sg,pl,sg',pl' -> lin Quant {
-    s = \\_  => table { Sg => sg ; Pl => pl } ;
-    sp = \\_ => table { 
-      Sg => \\c => regGenitiveS sg' ! npcase2case c ; Pl => \\c => regGenitiveS pl' ! npcase2case c}
+  mkQuantifier : Str -> Str -> Str -> Str -> Str -> Str -> Quant = 
+   \sg,pl,sg1',pl1',sg2',pl2' -> lin Quant {
+    s = \\_    => table { Sg => sg ; Pl => pl } ;
+    sp = \\g,_ => table {
+      Sg => \\c => regGenitiveS (case g of {Masc=>sg1'; Fem=>sg1'; Neutr=>sg2'}) ! npcase2case c ; 
+      Pl => \\c => regGenitiveS (case g of {Masc=>pl1'; Fem=>pl1'; Neutr=>pl2'}) ! npcase2case c} ;
+    isDef = True
     } ;
 
   mkOrd : Str -> Ord = \x -> lin Ord { s = regGenitiveS x};
@@ -495,6 +498,8 @@ mkInterj : Str -> Interj
   mkAdA x = lin AdA (ss x) ;
   mkAdN x = lin AdN (ss x) ;
 
+  mkCAdv sp sn p = lin CAdv {s = table Polarity [sp;sn]; p = p} ;
+
   mkPrep p = lin Prep {s=p; isPre=True} ;
   mkPost p = lin Prep {s=p; isPre=False} ;
   noPrep = mkPrep [] ;
@@ -506,12 +511,14 @@ mkInterj : Str -> Interj
       cries = (regN cry).s ! Pl ! Nom ; -- !
       cried : Str = case cries of {
         _ + "es" => init cries + "d" ;
+        _ + "ers" => init cries + "ed" ;
         _        => duplFinal cry + "ed"
         } ;
       crying : Str = case cry of {
         _  + "ee" => cry + "ing" ;
         d  + "ie" => d  + "ying" ;
         us + "e"  => us + "ing" ; 
+        ent + "er" => ent + "ering" ;
         _         => duplFinal cry + "ing"
         }
     in mk5V cry cries cried cried crying ;
@@ -644,7 +651,7 @@ mkInterj : Str -> Interj
     let ad = (a.s ! AAdj Posit Nom) 
     in regADeg ad ;
     
-  irregAdv a adv = lin A {s = table {AAdv => adv; aform => a.s ! aform}} ;
+  irregAdv a adv = lin A {s = table {AAdv => adv; aform => a.s ! aform}; isPre = a.isPre} ;
 
   prepA2 : A -> Prep -> A2 ;
 

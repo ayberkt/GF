@@ -670,4 +670,21 @@ abstract IrregItaAbs = Cat [V] ** {
   fun stravolgere_V : V ;
   fun svolgere_V : V ;
   fun travolgere_V : V ;
+
+  -- Added by John J. Camilleri Jan 2018
+  fun concludere_V : V ;
+  fun includere_V : V ;
+  fun escludere_V : V ;
+  fun precludere_V : V ;
+  fun sospendere_V : V ;
+  fun estendere_V : V ;
+  fun rendere_V : V ;
+  fun correggere_V : V ;
+  fun decidere_V : V ;
+  fun persistere_V : V ;
+  fun incidere_V : V ;
+  fun soddisfare_V' : V ;
+  fun proteggere_V : V ;
+  fun offrire_V : V ;
+  fun soffrire_V : V ;
 }

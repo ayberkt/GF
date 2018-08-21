@@ -673,4 +673,21 @@ concrete IrregIta of IrregItaAbs = CatIta [V] ** open ParadigmsIta, BeschIta in 
   lin stravolgere_V = verboV (volgere_97 "stravolgere") ;
   lin svolgere_V = verboV (volgere_97 "svolgere") ;
   lin travolgere_V = verboV (volgere_97 "travolgere") ;
+
+  -- Added by John J. Camilleri Jan 2018
+  lin concludere_V = verboV (chiudere_30 "concludere") ;
+  lin includere_V = verboV (chiudere_30 "includere") ;
+  lin escludere_V = verboV (chiudere_30 "escludere") ;
+  lin precludere_V = verboV (chiudere_30 "precludere") ;
+  lin sospendere_V = verboV (prendere_70 "sospendere") ;
+  lin estendere_V = verboV (prendere_70 "estendere") ;
+  lin rendere_V = verboV (prendere_70 "rendere") ;
+  lin correggere_V = verboV (leggere_56 "correggere") ;
+  lin decidere_V = verboV (ridere_74 "decidere") ;
+  lin persistere_V = verboV (assistere_24 "persistere") ;
+  lin incidere_V = verboV (ridere_74 "incidere") ;
+  lin soddisfare_V' = verboV (fare_52' "soddisfare") ;
+  lin proteggere_V = verboV (leggere_56 "proteggere") ;
+  lin offrire_V = verboV (aprire_102 "offrire") ;
+  lin soffrire_V = verboV (aprire_102 "soffrire") ;
 }

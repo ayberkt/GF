@@ -2,10 +2,10 @@ concrete ExtraEng of ExtraEngAbs = CatEng **
   open ResEng, Coordination, Prelude, MorphoEng, ParadigmsEng in {
 
   lin
-    GenNP np = {s = \\_,_ => np.s ! npGen ; sp = \\_,_,_ => np.s ! npGen} ;
+    GenNP np = {s = \\_,_ => np.s ! npGen ; sp = \\_,_,_,_ => np.s ! npGen; isDef = True} ;
     GenIP ip = {s = \\_ => ip.s ! NCase Gen} ;
     GenRP nu cn = {
-      s = \\c => "whose" ++ nu.s ! Nom ++ 
+      s = \\c => "whose" ++ nu.s ! False ! Nom ++ 
                  case c of {
                    RC _ (NCase Gen) => cn.s ! nu.n ! Gen ;
                    _ => cn.s ! nu.n ! Nom
@@ -91,9 +91,9 @@ concrete ExtraEng of ExtraEngAbs = CatEng **
       isPre = vp.isSimple                 -- depends on whether there are complements
       } ;
 
-    EmbedPresPart vp = {s = infVP VVPresPart vp Simul CPos (agrP3 Sg)} ; --- agr
+    EmbedPresPart vp = {s = \\a => infVP VVPresPart vp False Simul CPos a} ; --- agr
 
-    UttVPShort vp = {s = infVP VVAux vp Simul CPos (agrP3 Sg)} ;
+    UttVPShort vp = {s = infVP VVAux vp False Simul CPos (agrP3 Sg)} ;
 
   do_VV = {
     s = table {
@@ -206,7 +206,7 @@ lin
       mkClause "there" (agrP3 (fromAgr np.a).n) 
         (insertObj (\\_ => np.s ! NPAcc) (predV (regV "exist"))) ;
 
-   PurposeVP vp = {s = infVP VVInf vp Simul CPos (agrP3 Sg)} ; --- agr
+   PurposeVP vp = {s = infVP VVInf vp False Simul CPos (agrP3 Sg)} ; --- agr
 
 
    ComplBareVS  v s = insertExtra s.s (predV v) ;
@@ -288,7 +288,7 @@ lin
   lin 
     ReflRNP vps rnp = insertObjPre (\\a => vps.c2 ++ rnp.s ! a) vps ;
     ReflPron = {s = reflPron} ;
-    ReflPoss num cn = {s = \\a => possPron ! a ++ num.s ! Nom ++ cn.s ! num.n ! Nom} ;
+    ReflPoss num cn = {s = \\a => possPron ! a ++ num.s ! True ! Nom ++ cn.s ! num.n ! Nom} ;
     PredetRNP predet rnp = {s = \\a => predet.s ++ rnp.s ! a} ;
 
     ConjRNP conj rpns = conjunctDistrTable Agr conj rpns ;

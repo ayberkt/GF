@@ -15,16 +15,16 @@ concrete PhraseBul of Phrase = CatBul ** open Prelude, ResBul in {
     UttIP ip = {s = ip.s ! RSubj ! QDir} ;
     UttIAdv iadv = {s = iadv.s ! QDir} ;
     UttNP np = {s = np.s ! RSubj} ;
-    UttVP vp = {s = daComplex Simul Pos vp ! Perf ! agrP3 (GSg Neut)} ;
+    UttVP vp = {s = daComplex Simul vp.p vp ! Perf ! agrP3 (GSg Neut)} ;
     UttAdv adv = adv ;
     UttCN n = {s = n.s ! NF Sg Indef} ;
     UttCard n = {s = n.s ! CFNeut Indef} ;
-    UttAP ap = {s = ap.s ! ASg Masc Indef} ;
+    UttAP ap = {s = ap.s ! ASg Masc Indef ! P3} ;
     UttInterj i = i ;
 
     NoPConj = {s = []} ;
     PConjConj conj = {s = conj.s ++ linCoord!conj.conj} ;
 
     NoVoc = {s = []} ;
-    VocNP np = {s = comma ++ np.s ! RVoc} ;
+    VocNP np = {s = bindComma ++ np.s ! RVoc} ;
 }

@@ -50,7 +50,8 @@ lin
           tr (th []  ++ th (heading positive_Parameter) ++ th (heading comparative_Parameter) ++ 
                         th (heading superlative_Parameter)) ++
           tr (th (heading predicative_Parameter) ++ gforms APred) ++
-          tr (th (heading attributive_Parameter) ++ gforms AAttr) ++
+          tr (th (heading attributive_Parameter) ++ gforms (AAttr Utr)) ++
+          tr (th (heading attributive_Parameter) ++ gforms (AAttr Neutr)) ++
           tr (th (heading partitive_Parameter)   ++ gforms AGen)
           )
     in { t  = "a" ;
@@ -176,7 +177,7 @@ oper
           tr (th (heading imperative_Parameter ++ heading singular_Parameter) ++ td (vfin VImp2 ++ Predef.BIND ++ "," ++ vfin VImp3)) ++
           tr (th (heading imperative_Parameter ++ heading plural_Parameter)  ++ td (vfin (VImpPl))) ++
           tr (th (heading infinitive_Parameter)            ++ td (verb.s ! VInf)) ++
-          tr (th (heading perfect_Parameter ++ heading participle_Parameter) ++ td (verb.s ! VPerf)) ++
+          tr (th (heading perfect_Parameter ++ heading participle_Parameter) ++ td (verb.s ! VPerf APred)) ++
           tr (th (heading imperfect_Parameter ++ heading participle_Parameter) ++ td (verb.s ! VPresPart)) ++
           tr (th (heading gerund_Parameter)            ++ td (verb.s ! VGer)) ++
           tr (th (heading aux_verb_Parameter)       ++ td (case verb.aux of {VHebben => "hebben" ; VZijn => "zijn"}))

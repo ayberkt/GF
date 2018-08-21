@@ -3,6 +3,7 @@
 module GF.Server(server) where
 import Data.List(partition,stripPrefix,isInfixOf)
 import qualified Data.Map as M
+import Control.Applicative -- for GHC<7.10
 import Control.Monad(when)
 import Control.Monad.State(StateT(..),get,gets,put)
 import Control.Monad.Error(ErrorT(..),Error(..))
@@ -33,7 +34,7 @@ import Network.Shed.Httpd(initServer,Request(..),Response(..),noCache)
 --import qualified Network.FastCGI as FCGI -- from hackage direct-fastcgi
 import Network.CGI(handleErrors,liftIO)
 import CGIUtils(handleCGIErrors)--,outputJSONP,stderrToFile
-import Text.JSON(encode,showJSON,makeObj)
+import Text.JSON(JSValue(..),Result(..),valFromObj,encode,decode,showJSON,makeObj)
 --import System.IO.Silently(hCapture)
 import System.Process(readProcessWithExitCode)
 import System.Exit(ExitCode(..))
@@ -283,13 +284,17 @@ handle logLn documentroot state0 cache execute1 stateVar
     skip_empty = filter (not.null.snd)
 
     jsonList = jsonList' return
-    jsonListLong = jsonList' (mapM addTime)
+    jsonListLong ext = jsonList' (mapM (addTime ext)) ext
     jsonList' details ext = fmap (json200) (details =<< ls_ext "." ext)
 
-    addTime path =
+    addTime ext path =
         do t <- getModificationTime path
-           return $ makeObj ["path".=path,"time".=format t]
+           if ext==".json"
+             then addComment (time t) <$> liftIO (try $ getComment path)
+             else return . makeObj $ time t
       where
+        addComment t = makeObj . either (const t) (\c->t++["comment".=c])
+        time t = ["path".=path,"time".=format t]
         format = formatTime defaultTimeLocale rfc822DateFormat
 
     rm path | takeExtension path `elem` ok_to_delete =
@@ -330,6 +335,11 @@ handle logLn documentroot state0 cache execute1 stateVar
     ls_ext dir ext =
         do paths <- getDirectoryContents dir
            return [path | path<-paths, takeExtension path==ext]
+
+    getComment path =
+       do Ok (JSObject obj) <- decode <$> readFile path
+          Ok cmnt <- return (valFromObj "comment" obj)
+          return (cmnt::String)
 
 -- * Dynamic content
 

@@ -1,5 +1,5 @@
 concrete ExtraDut of ExtraDutAbs = CatDut ** 
-  open ResDut, MorphoDut, Coordination, Prelude, IrregDut, (P = ParadigmsDut) in 
+  open ResDut, Coordination, Prelude, IrregDut, (P = ParadigmsDut), (E=ExtendDut), NounDut in 
 {
 
   flags coding=utf8 ;
@@ -11,36 +11,17 @@ concrete ExtraDut of ExtraDutAbs = CatDut **
     BaseVPI = twoTable Bool ;
     ConsVPI = consrTable Bool comma ;
 
-    MkVPI vp = {s = \\b => useInfVP b vp} ;
+    MkVPI vp = {s = \\b => useInfVP b vp ! agrP3 Sg } ;
     ConjVPI = conjunctDistrTable Bool ;
 
     ComplVPIVV v vpi = 
         insertInf (vpi.s ! v.isAux) (
            predVGen v.isAux BeforeObjs v) ; ----
---{-
---      insertExtrapos vpi.p3 (
---        insertInf vpi.p2 (
---          insertObj vpi.p1 (
---            predVGen v.isAux vpi.negPos v))) ;
----}
---
---    PPzuAdv cn = {s = case cn.g of {
---      Masc | Neutr => "zum" ;
---      Fem => "zur"
---      } ++ cn.s ! adjfCase Weak Dat ! Sg ! Dat 
---    } ;
---
---    TImpfSubj  = {s = [] ; t = Past ; m = MConjunct} ;   --# notpresent
---
---    moegen_VV = auxVV mögen_V ;
---
---} 
-
 
 lin
-    ICompAP ap = {s = \\_ => "hoe" ++ ap.s ! APred} ; 
+    ICompAP = E.ICompAP ;
 
-    IAdvAdv adv = {s = "hoe" ++ adv.s} ;
+    IAdvAdv = E.IAdvAdv ;
 
   lincat
     VPS   = {s : Order => Agr => Str} ;
@@ -77,7 +58,7 @@ lin
           b = p.p ;
           vform = vForm t agr.g agr.n agr.p o ;
           auxv = (auxVerb vp.s.aux).s ;
-          vperf = vp.s.s ! VPerf ;
+          vperf = vp.s.s ! VPerf APred ;
           verb : Str * Str = case <t,a> of {
             <Fut|Cond,Simul>  => <zullen_V.s ! vform, vp.s.s ! VInf> ; --# notpresent
             <Fut|Cond,Anter>  => <zullen_V.s ! vform, vperf ++ auxv ! VInf> ; --# notpresent
@@ -115,29 +96,26 @@ lin
     ConjVPS = conjunctDistrTable2 Order Agr ;
 
     PassVPSlash vps = 
-      insertInf (vps.s.s ! VPerf) (predV ResDut.worden_V) ;
+      insertInf (vps.s.s ! VPerf APred) (predV ResDut.worden_V) ;
     PassAgentVPSlash vps np = 
-      insertAdv (appPrep "door" np.s) (insertInf (vps.s.s ! VPerf) (predV ResDut.worden_V)) ;
+      insertAdv (appPrep (P.mkPrep "door") np) (insertInf (vps.s.s ! VPerf APred) (predV ResDut.worden_V)) ;
 
 lin
  NominalizeVPSlashNP vpslash np =
            --False for negation place; doesn't matter because vp.a1 ! Pos is chosen
-           let  vp : ResDut.VP = insertObjNP np.isPron AfterObjs (\\_ => appPrep vpslash.c2.p1 np.s) vpslash ;
+           let  vp : ResDut.VP = insertObjNP np.isPron AfterObjs (\\_ => appPrep vpslash.c2.p1 np) vpslash ;
                 agrDef : Agr = agrP3 Sg ; 
                 compl : Str = vp.n0 ! agrDef ++ vp.a1 ! Pos ++ vp.n2 ! agrDef ++ vp.s.prefix ; 
                 inf : Str = vp.inf.p1 ;
                 extra : Str = vp.ext
             in       
-            lin NP (MorphoDut.mkNP (vp.s.s ! VInf ++ "van" ++ compl ++ inf ++ extra ) Utr Sg) ;  
+            lin NP (mkNP (vp.s.s ! VInf ++ "van" ++ compl ++ inf ++ extra ) Utr Sg) ;  
 
 
 lin
   zullen_VV = lin VV (zullen_V ** {isAux = True}) ;
 
-  StressedPron pron = {
-      s = table {NPNom => pron.stressed.nom ; NPAcc => pron.stressed.acc} ;
-      a = pron.a ;
-      isPron = True
-      } ; 
+  StressedPron pron = UsePron pron ** {
+      s = table {NPNom => pron.stressed.nom ; NPAcc => pron.stressed.acc} } ; 
 
 }

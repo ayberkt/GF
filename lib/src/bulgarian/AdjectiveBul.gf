@@ -4,70 +4,58 @@ concrete AdjectiveBul of Adjective = CatBul ** open ResBul, Prelude in {
 
   lin
     PositA  a = {
-      s = \\aform => a.s ! aform ;
-      adv = a.adv ;
-      isPre = True
+      s = \\aform,_ => a.s ! aform ;
+      isPre = a.isPre
       } ;
 
     ComparA a np = {
-      s = \\aform => "по" ++ hyphen ++ a.s ! aform ++ "от" ++ np.s ! RObj Acc ; 
-      adv = "по" ++ hyphen ++ a.adv ++ "от" ++ np.s ! RObj Acc ;
+      s = \\aform,_ => "по" ++ hyphen ++ a.s ! aform ++ "от" ++ np.s ! RObj CPrep ;
       isPre = True
       } ;
     UseComparA a = {
-      s = \\aform => "по" ++ hyphen ++ a.s ! aform ; 
-      adv = "по" ++ hyphen ++ a.adv ;
+      s = \\aform,_ => "по" ++ hyphen ++ a.s ! aform ; 
       isPre = True
       } ;
 
     AdjOrd ord = {
-      s = ord.s ;
-      adv = ord.s ! ASg Neut Indef ; 
+      s = \\aform,_ => ord.s ! aform ;
       isPre = True
       } ;
 
 -- $SuperlA$ belongs to determiner syntax in $Noun$.
 
----- just to make the API compile. AR 7/4/2010
     CAdvAP ad ap np = {
-      s = \\a => ad.s ++ ap.s ! a ++ ad.sn ++ np.s ! RObj Acc ; 
-      adv =      ad.s ++ ap.adv ++ ad.sn ++ np.s ! RObj Acc ; 
+      s = \\a,p => ad.s ++ ap.s ! a ! p ++ ad.p ++ np.s ! RObj CPrep ; 
       isPre = False
       } ;
 
     ComplA2 a np = {
-      s = \\aform => a.s ! aform ++ a.c2 ++ np.s ! RObj Acc ; 
-      adv = a.adv ++ a.c2 ++ np.s ! RObj Acc ; 
+      s = \\aform,p => a.s ! aform ++ a.c2 ++ np.s ! RObj CPrep ; 
       isPre = False
       } ;
 
     ReflA2 a = {
-      s = \\aform => a.s ! aform ++ a.c2 ++ ["себе си"] ; 
-      adv = a.adv ++ a.c2 ++ ["себе си"] ; 
+      s = \\aform,_ => a.s ! aform ++ a.c2 ++ ["себе си"] ;
       isPre = False
       } ;
 
     SentAP ap sc = {
-      s = \\a => ap.s ! a ++ sc.s ;
-      adv = ap.adv ++ sc.s ;
+      s = \\a,p => ap.s ! a ! p ++ sc.s ! {gn=aform2gennum a; p=p} ;
       isPre = False
       } ;
 
     AdAP ada ap = {
-      s = \\a => ada.s ++ ap.s ! a ;
-      adv = ada.s ++ ap.adv ;
+      s = \\a,p => ada.s ++ ap.s ! a ! p ;
       isPre = ap.isPre
       } ;
 
     UseA2 a = {
-      s = a.s ; 
-      adv = a.adv ; 
+      s = \\aform,p => a.s ! aform ;
       isPre = True
       } ;
       
     AdvAP ap adv = {
-      s = \\aform => ap.s ! aform ++ adv.s ;
-      adv = ap.adv ++ adv.s;
+      s = \\aform,p => ap.s ! aform ! p ++ adv.s ;
       isPre = False
     } ;
 

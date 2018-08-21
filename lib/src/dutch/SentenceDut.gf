@@ -12,11 +12,11 @@ concrete SentenceDut of Sentence = CatDut ** open ResDut, Prelude in {
       s = \\pol,im => 
         let 
           ps = case im of {
-            ImpF Pl _     => <VImpPl,[],Pl> ;
-            ImpF Sg True  => <VImp3,"u",Sg> ;
-            ImpF Sg False => <VImp2,[],Sg>
+            ImpF Pl _     => <VImp2,[],Pl,P2> ;
+            ImpF Sg True  => <VImp3,"u",Sg,P3> ;
+            ImpF Sg False => <VImp2,[],Sg,P2>
             } ;
-          agr  = {g = Utr ; n = ps.p3 ; p = P2} ; ---- P2? -- g does not matter
+          agr  = {g = Utr ; n = ps.p3 ; p = ps.p4 } ; -- g does not matter
           verb = vp.s.s ! ps.p1 ;
 	  part = vp.s.particle ++ vp.a2 ++ vp.s.prefix ; -- as in mkClause
           inf  = vp.inf.p1 ;
@@ -42,7 +42,7 @@ concrete SentenceDut of Sentence = CatDut ** open ResDut, Prelude in {
       c2 = slash.c2
     } ;
 
-    SlashPrep cl prep = cl ** {c2 = prep.s} ;
+    SlashPrep cl prep = cl ** {c2 = prep} ;
 
     SlashVS np vs slash = 
         mkClause (np.s ! NPNom) np.a 
@@ -51,7 +51,7 @@ concrete SentenceDut of Sentence = CatDut ** open ResDut, Prelude in {
 
     EmbedS  s  = {s = conjThat ++ s.s ! Sub} ;
     EmbedQS qs = {s = qs.s ! QIndir} ;
-    EmbedVP vp = {s = useInfVP False vp} ;
+    EmbedVP vp = {s = useInfVP False vp ! agrP3 Sg } ;
 
     UseCl t p cl = {
       s = \\o => t.s ++ p.s ++ cl.s ! t.t ! t.a ! p.p ! o
@@ -68,10 +68,10 @@ concrete SentenceDut of Sentence = CatDut ** open ResDut, Prelude in {
       } ;
 
     AdvS a s = {s = \\o => a.s ++ s.s ! Inv} ;
-    ExtAdvS a s = {s = \\o => a.s ++ "," ++ s.s ! Inv} ;
+    ExtAdvS a s = {s = \\o => a.s ++ bindComma ++ s.s ! Inv} ;
 
-    RelS s r = {s = \\o => s.s ! o ++ "," ++ r.s ! Neutr ! Sg} ;
+    RelS s r = {s = \\o => s.s ! o ++ bindComma ++ r.s ! Neutr ! Sg} ;
 
-    SSubjS a s b = {s = \\o => a.s ! o ++ "," ++ s.s ++ b.s ! Sub} ;
+    SSubjS a s b = {s = \\o => a.s ! o ++ bindComma ++ s.s ++ b.s ! Sub} ;
 
 }

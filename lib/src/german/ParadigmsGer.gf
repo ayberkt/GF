@@ -50,7 +50,7 @@ oper
 
   anDat_Case : Case ; -- preposition "an" accusative with contraction "am" --%
   inAcc_Case : Case ; -- preposition "in" accusative with contraction "ins" --%
-  inDat_Case : Case ; -- preposition "in" dative with contraction "am" --%
+  inDat_Case : Case ; -- preposition "in" dative with contraction "im" --%
   zuDat_Case : Case ; -- preposition "zu" dative with contractions "zum", "zur" --%
   vonDat_Case : Case ;
 
@@ -382,7 +382,7 @@ mkV2 : overload {
 
   regN : Str -> N = \hund -> case hund of {
     _ + "e" => mk6N hund hund hund hund (hund + "n") (hund + "n") Fem ;
-    _ + ("ion" | "ung") => mk6N hund hund hund hund (hund + "en") (hund + "en") Fem ;
+    _ + ("ion" | "ung" | "keit" | "heit" | "schaft") => mk6N hund hund hund hund (hund + "en") (hund + "en") Fem ;
     _ + ("er" | "en" | "el") => mk6N hund hund hund (genitS (True | False) hund) hund (pluralN hund) Masc ; 
     _ + "nis" => mk6N hund hund hund hund (hund + "se") (hund + "sen") Neutr ;
     _  => mk6N hund hund hund (genitS (True | False) hund) (hund + "e") (pluralN hund) Masc

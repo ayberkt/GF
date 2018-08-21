@@ -6,33 +6,39 @@ concrete SentenceBul of Sentence = CatBul ** open Prelude, ResBul in {
   flags optimize=all_subs ;
 
   lin
-    PredVP np vp = mkClause (np.s ! (case vp.vtype of {
-                                       VNormal    => RSubj ;
-                                       VMedial  _ => RSubj ;
-                                       VPhrasal c => RObj c})) np.a np.p vp ;
+    PredVP np vp = mkClause (case vp.vtype of {
+                                VNormal    => np.s ! RSubj ;
+                                VMedial  _ => np.s ! RSubj ;
+                                VPhrasal c => linCase c (personPol np.p) ++ np.s ! RObj CPrep}) np.gn np.p vp ;
 
-    PredSCVP sc vp = mkClause sc.s {gn=GSg Masc; p=P3} Pos vp ;
+    PredSCVP sc vp = mkClause (sc.s ! {gn=GSg Masc; p=P3}) (GSg Masc) (NounP3 Pos) vp ;
 
     ImpVP vp = {
       s = \\p,gn => 
         let agr    = {gn = gn ; p = P2} ;
-            verb   = vp.s ! Perf ! VImperative (numGenNum gn) ;
+            verb   : Aspect -> Str
+                   = \asp -> vp.s ! asp ! VImperative (numGenNum gn) ;
             compl  = vp.compl ! agr ;
             clitic = case vp.vtype of {
-	               VNormal    => [] ;
-	               VMedial c  => reflClitics ! c ;
-	               VPhrasal c => personalClitics ! c ! agr.gn ! agr.p
-	             } ;
-        in case p of {Pos => vp.ad.s ++ verb ++ clitic ;
-                      Neg => "не" ++ vp.ad.s ++ clitic ++ verb} ++ compl ;
+                       VNormal      => vp.clitics;
+                       VMedial c    => vp.clitics++reflClitics ! c;
+                       VPhrasal Dat => personalClitics agr ! Dat++vp.clitics;
+                       VPhrasal c   => vp.clitics++personalClitics agr ! c
+                     }
+        in case orPol p vp.p of {
+             Pos => vp.ad.s ++ verb Perf ++ clitic ;
+             Neg => "не" ++ vp.ad.s ++ clitic ++ verb Imperf
+           } ++ compl ;
     } ;
 
     SlashVP np slash =  {
-      s = \\agr => (mkClause (np.s ! RSubj) np.a np.p {s      = slash.s ;
-                                                       ad     = slash.ad ;
-                                                       compl  = \\_ => slash.compl1 ! np.a ++ slash.compl2 ! agr ;
-                                                       vtype  = slash.vtype ;
-                                                       p      = Pos}).s ;
+      s = \\agr => (mkClause (np.s ! RSubj) np.gn np.p {s      = slash.s ;
+                                                        ad     = slash.ad ;
+                                                        clitics= slash.clitics ;
+                                                        compl  = \\_ => slash.compl1 ! personAgr np.gn np.p ++ slash.compl2 ! agr ;
+                                                        vtype  = slash.vtype ;
+                                                        p      = Pos ;
+                                                        isSimple = slash.isSimple}).s ;
       c2 = slash.c2
     } ;
 
@@ -44,14 +50,14 @@ concrete SentenceBul of Sentence = CatBul ** open Prelude, ResBul in {
     SlashPrep cl prep = {s = \\_ => cl.s; c2 = prep} ;
     
     SlashVS np vs slash = {
-      s = \\agr => (mkClause (np.s ! RSubj) np.a np.p
+      s = \\agr => (mkClause (np.s ! RSubj) np.gn np.p
                              (insertObj (\\_ => "че" ++ slash.s ! agr) Pos (predV vs))).s ;
       c2 = slash.c2
     } ;
 
-    EmbedS  s  = {s = comma ++ "че" ++ s.s} ;
-    EmbedQS qs = {s = qs.s ! QIndir} ;
-    EmbedVP vp = {s = daComplex Simul Pos vp ! Perf ! {gn=GSg Masc; p=P1}} ;
+    EmbedS  s  = {s = \\_ => "че" ++ s.s} ;
+    EmbedQS qs = {s = \\_ => qs.s ! QIndir} ;
+    EmbedVP vp = {s = \\agr => daComplex Simul vp.p vp ! Perf ! agr} ;
 
     UseCl t p cl = {
       s = t.s ++ p.s ++ cl.s ! t.t ! t.a ! p.p ! Main
@@ -68,10 +74,10 @@ concrete SentenceBul of Sentence = CatBul ** open Prelude, ResBul in {
       c2 = cl.c2
     } ;
 
-    ExtAdvS a s = {s = a.s ++ comma ++ s.s} ;
+    ExtAdvS a s = {s = a.s ++ bindComma ++ s.s} ;
     AdvS a s = {s = a.s ++ s.s} ;
 
-    SSubjS a s b = {s = a.s ++ comma ++ s.s ++ b.s} ;
+    SSubjS a s b = {s = a.s ++ bindComma ++ s.s ++ b.s} ;
 
-    RelS s r = {s = s.s ++ comma ++ r.s ! {gn=gennum ANeut Sg; p=P3}} ;
+    RelS s r = {s = s.s ++ bindComma ++ r.s ! {gn=gennum ANeut Sg; p=P3}} ;
 }

@@ -21,10 +21,10 @@ concrete CatDut of Cat =
 -- Question
 
     QCl = {s : ResDut.Tense => Anteriority => Polarity => QForm => Str} ;
-    IP = {s : NPCase => Str ; n : Number} ;
+    IP = MergesWithPrep ** {s : NPCase => Str ; n : Number} ; -- met wat -> waarmee
     IComp  = {s : Agr => Str} ; 
-    IDet   = {s : Gender => Str ; n : Number} ;
-    IQuant = {s : Number => Gender => Str} ;
+    IDet   = MergesWithPrep ** {s : Gender => Str ; n : Number} ;
+    IQuant = MergesWithPrep ** {s : Number => Gender => Str} ;
 
 -- Relative
 
@@ -34,25 +34,22 @@ concrete CatDut of Cat =
 -- Verb
 
     VP = ResDut.VP ;
-    VPSlash = ResDut.VP ** {c2 : Preposition * Bool} ;
+    VPSlash = ResDut.VP ** {c2 : Preposition * Bool} ; -- False = empty prep
     Comp = {s : Agr => Str} ; 
 
 -- Adjective
 
-    AP = {s : AForm => Str ; isPre : Bool} ; 
+    AP = {s : Agr => AForm => Str ; isPre : Bool} ; 
 
 -- Noun
 
     CN = {s : Adjf => NForm => Str ; g : Gender} ;
-    NP = {s : NPCase => Str ; a : Agr ; isPron : Bool} ;
+    NP = NounPhrase ; 
+
     Pron = Pronoun ;
 
-    Det = {s,sp : Gender => Str ; n : Number ; a : Adjf} ;
-    Quant = {
-      s  : Bool => Number => Gender => Str ; 
-      sp : Number => Gender => Str ; 
-      a  : Adjf
-      } ;
+    Det = Determiner ;
+    Quant = Quantifier ;
     Predet = {s : Number => Gender => Str} ;
     Num = {s : Str ; n : Number ; isNum : Bool} ;
     Card = {s : Gender => Case => Str ; n : Number} ;
@@ -67,7 +64,7 @@ concrete CatDut of Cat =
 
     Conj = {s1,s2 : Str ; n : Number} ;
     Subj = {s : Str} ;
-    Prep = {s : Str} ;
+    Prep = Preposition ;
 
 -- Open lexical classes, e.g. Lexicon
 
