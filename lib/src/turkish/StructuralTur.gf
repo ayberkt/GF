@@ -250,6 +250,8 @@ concrete StructuralTur of Structural = CatTur **
 
     whatSg_IP = { s = "ne" } ;
 
+    -- Not sure what this is for given that we have separate functions for the
+    -- plural "what" case and the singular "what" case.
     what_IP = { s = "ne" } ;
 
 }
